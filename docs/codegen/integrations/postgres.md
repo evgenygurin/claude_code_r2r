@@ -1,0 +1,33 @@
+# Postgres Integration
+
+Integrate Codegen with your Postgres (or Postgres-compatible databases) to enable database querying capabilities.
+
+## Installation
+
+Connect your database to Codegen by configuring your database credentials in the settings.
+
+<Card title="Configure Database Access" icon="shield" href="https://codegen.com/integrations/postgresql">
+  Set up your database connection credentials in the secure settings panel.
+</Card>
+
+<Note type="warning">
+  For security reasons, it is strongly recommended to configure credentials with READ-ONLY access.
+  Providing write access to automated agents could potentially lead to unintended data modifications
+  or other negative consequences.
+</Note>
+
+## Capabilities
+
+The Postgres integration provides secure database access enabling agents to:
+
+* **Query Data:** Execute SELECT queries to fetch information from your database
+* **Analyze Schema:** View table structures, relationships, and column definitions
+* **Generate Reports:** Create data summaries and analysis based on query results
+
+## How Agents Use Postgres
+
+Agents leverage the Postgres integration to assist with data-related tasks:
+
+* **Data Exploration:** Safely query your database to understand data structures and relationships
+* **Report Generation:** Create data-driven reports and analytics
+* **Schema Analysis:** Provide insights about database design and optimization

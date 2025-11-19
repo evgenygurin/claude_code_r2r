@@ -1,0 +1,77 @@
+# Code Execution Sandboxes
+
+Codegen agents operate within secure, isolated sandbox environments where they can safely execute code and run commands without affecting your local machine or production systems.
+
+<Frame>
+  <video controls src="https://res.cloudinary.com/dbikr6pew/video/upload/v1757979569/Sandbox_Configuration_uf9xt6.mp4" className="aspect-[3312/2160]" />
+</Frame>
+
+<Tip>
+  Codegen's sandbox environments are highly configurable and built for
+  enterprise workloads
+</Tip>
+
+<Card title="Configure Sandbox Environments" icon="code" href="https://codegen.com/repos">
+  Select VM resources, install dependencies, securely upload secrets and more.
+</Card>
+
+## Capabilities
+
+Each sandbox provides a controlled environment with:
+
+* **File System Access:** Read, write, and modify files within the sandbox's temporary file system.
+* **Terminal Access:** Execute shell commands (`bash`, `sh`, etc.) to run scripts, linters, formatters, build tools, and other necessary commands.
+* **Process Execution:** Run code in various languages (Python, Node.js, etc., depending on the sandbox image).
+* **Networking:** Controlled network access for tasks like installing packages or fetching data (can be restricted).
+
+## How Agents Use Sandboxes
+
+Agents utilize sandboxes for a variety of tasks:
+
+* **Testing Code:** Running unit tests, integration tests, or linters against the code they've written or modified.
+* **Verifying Changes:** Executing the code to ensure it runs correctly before committing.
+* **Installing Dependencies:** Using package managers (`pip`, `npm`, `yarn`) to install necessary libraries.
+* **Running Tools:** Executing build scripts, code formatters, or other development utilities.
+
+## Configuration
+
+Sandboxes are typically configured per-agent run or defined within your Codegen settings. You often don't need to manage them directly, but advanced configurations might allow specifying Docker images or environment variables.
+
+<Note>
+  Sandboxes maintain file system persistence between agent interactions within
+  the same context. For example, when continuing a conversation across different
+  Slack messages or Linear comments, the sandbox state is preserved, allowing
+  agents to seamlessly continue their work without losing context or having to
+  reinstall dependencies.
+</Note>
+
+## Sandbox Configuration
+
+<CardGroup cols={2}>
+  <Card title="Setup Commands" icon="terminal" href="/sandboxes/setup-commands">
+    Configure custom setup commands that run when initializing your sandbox
+    environment.
+  </Card>
+
+  <Card title="Repository Secrets" icon="key" href="/sandboxes/secrets">
+    Manage environment variables and secrets securely injected into your
+    sandbox.
+  </Card>
+
+  <Card title="Image Snapshots" icon="camera" href="/sandboxes/image-snapshots">
+    Learn how Codegen creates filesystem snapshots for faster initialization.
+  </Card>
+
+  <Card title="Web Preview" icon="browser" href="/sandboxes/web-preview">
+    Start development servers and view your running applications through
+    Codegen.
+  </Card>
+
+  <Card title="Base Image" icon="docker" href="/sandboxes/base-image">
+    Explore the comprehensive Docker image that powers Codegen sandboxes.
+  </Card>
+
+  <Card title="Remote Editor" icon="laptop-code" href="/sandboxes/editor">
+    Access a VSCode editor connected directly to your sandbox environment.
+  </Card>
+</CardGroup>

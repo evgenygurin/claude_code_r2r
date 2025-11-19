@@ -1,0 +1,51 @@
+# Frequently Asked Questions
+
+<AccordionGroup>
+  <Accordion title="What languages does Codegen support?" icon="code">
+    The Codegen AI agent leverages modern large language models (LLMs) for code
+    understanding and generation. This means it can generally handle tasks
+    involving any programming language, configuration format (like JSON, YAML),
+    documentation (like Markdown), or other text-based files that current LLMs
+    are proficient with. If you have specific needs or find limitations with a
+    particular language or format, please let us know!
+  </Accordion>
+
+  <Accordion title="Is Codegen exact?" icon="scale-balanced">
+    The Codegen agent uses large language models to understand and modify code.
+    While powerful, its understanding isn't based on formal static analysis and
+    may not always be perfectly exact or catch all edge cases like a traditional
+    compiler or linter might. It aims for practical correctness based on the
+    provided context and instructions.
+  </Accordion>
+
+  <Accordion title="Is Codegen suitable for large codebases?" icon="database">
+    Yes! Codegen's agent is designed to work effectively on large, real-world
+    codebases. You can provide context and specific instructions to help it
+    navigate complex projects.
+
+    <Tip>
+      For enterprise use cases and support, please reach out to
+      [team@codegen.com](mailto:team@codegen.com)
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Can I use the Codegen SDK with my existing tools?" icon="screwdriver-wrench">
+    Yes. The Codegen SDK is a standard Python package (`pip install codegen`).
+    You can import and use it in your Python scripts, CI/CD pipelines, or any
+    other development tool that can execute Python code.
+  </Accordion>
+
+  <Accordion title="How can I contribute if I'm new to the project?" icon="hand-holding-heart">
+    Start by trying out the Codegen agent and SDK, joining our [Slack
+    community](https://community.codegen.com), and reporting any issues or
+    feedback on [GitHub](https://github.com/codegen-sh/codegen-sdk). We welcome
+    contributions to documentation, examples, and SDK improvements.
+  </Accordion>
+
+  <Accordion title="Where can I get help if I'm stuck?" icon="life-ring">
+    The best places to get help are: 1. Our community [Slack
+    channel](https://community.codegen.com) 2. [GitHub
+    issues](https://github.com/codegen-sh/codegen-sdk) for bug reports or SDK
+    feature requests 3. Reach out to us on [Twitter](https://x.com/codegen)
+  </Accordion>
+</AccordionGroup>

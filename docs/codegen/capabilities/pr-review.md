@@ -1,0 +1,51 @@
+# PR Review Agent
+
+Codegen provides AI code review as a first-class supported feature.
+
+<Frame>
+  <video controls src="https://res.cloudinary.com/dbikr6pew/video/upload/v1757981307/Reviews_lufat8.mp4" className="aspect-[3584/2160]" />
+</Frame>
+
+<Card title="Configure PR Reviews" icon="microscope" href="https://codegen.com/settings/review">
+  Set up PR review at the organization level, then customize per repository.
+</Card>
+
+## How It Works
+
+When PR review is enabled on a repo, a Codegen agent will spin up to leave a detailed review.
+
+This includes:
+
+* **Inline comments** on specific lines with actionable feedback
+* **Security scanning** for vulnerabilities and unsafe patterns
+* **Code quality** suggestions for maintainability and best practices
+* **Architectural feedback** on design patterns and structure
+
+## Configuration
+
+Configure PR reviews at two levels:
+
+### Organization Settings
+
+Set global defaults and organization-wide review rules at [Organization Settings → PR Review](https://codegen.com/settings/review).
+
+### Repository Settings
+
+Override settings and add repository-specific rules at **Repository Settings → Review**.
+
+Repository rules are combined with organization rules for comprehensive coverage. You can:
+
+* Enable/disable PR reviews for the repository
+* Add custom review guidelines specific to the codebase
+* Define language-specific requirements
+* Set repository-specific coding standards
+
+<Tip>
+  Start with organization-level settings, then customize individual repositories
+  as needed.
+</Tip>
+
+<Note>
+  PR reviews require read access to your repository. Enable the feature at both
+  organization and repository levels to activate reviews.
+</Note>

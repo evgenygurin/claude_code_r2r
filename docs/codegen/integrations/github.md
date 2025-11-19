@@ -1,0 +1,50 @@
+# GitHub Integration
+
+GitHub is how Codegen accesses your repository contents and performs all git interactions. Codegen can create PRs from requests or issues, help resolve merge conflicts, conduct code reviews, search through your codebase, and handle the full spectrum of agentic coding workflows—everything flows through GitHub.
+
+## Installation
+
+Authorize Codegen to access your GitHub organizations and repositories.
+
+<Card title="Install Codegen GitHub App" icon="github" href="https://github.com/apps/codegen-sh">
+  Click here to install the Codegen GitHub App and grant necessary permissions.
+</Card>
+
+## Capabilities
+
+The GitHub integration provides comprehensive development workflow capabilities:
+
+* **Create and manage pull requests** - Generate, update, and manage PRs with detailed descriptions and context
+* **Automated code reviews and feedback** - Provide intelligent code analysis and suggestions
+* **Run checks and CI/CD workflows** - Execute automated testing and deployment processes
+* **Sync repository changes** - Keep repositories up-to-date and coordinate between branches
+
+## Permissions
+
+The Codegen GitHub integration requires the following permissions to function as a full development team member:
+
+* **Read and write repository contents** - Access code, files, and repository structure
+* **Create and manage pull requests** - Generate, update, and merge pull requests
+* **Write status checks and CI/CD results** - Report on automated testing and deployment status
+* **Read and write issues and comments** - Interact with project issues and provide updates
+* **Read repository metadata and settings** - Access repository configuration and settings
+* **Read and write GitHub Actions workflows** - Manage automated workflows and CI/CD pipelines
+* **Read organization projects and members** - Access team structure and project organization
+* **Manage webhooks for real-time updates** - Enable real-time synchronization and notifications
+
+## How Agents Use GitHub
+
+Agents leverage the GitHub integration to:
+
+* **Understand Context:** Read code and related issues/PRs to grasp the task requirements.
+* **Implement Changes:** Create branches and commit code directly based on your prompts.
+* **Request Reviews:** Open pull requests and automatically request reviews from specified team members.
+* **Report Progress:** Comment on related issues or PRs with updates, results, or requests for clarification.
+
+<Tip>
+  You can manage repository access granularly through the GitHub App settings.
+</Tip>
+
+<Note>
+  Ensure the agent has access to the specific repositories it needs to work on.
+</Note>

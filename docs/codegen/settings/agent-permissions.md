@@ -1,0 +1,113 @@
+# Agent Permissions
+
+Configure what actions the AI agent is allowed to perform across your organization. These permission settings provide fine-grained control over agent capabilities to ensure they operate within your security and workflow requirements.
+
+<Card title="Configure Agent Permissions" icon="shield-check" href="https://codegen.com/settings/permissions">
+  Control what actions agents are allowed to perform in your organization.
+</Card>
+
+## Available Permissions
+
+### Enable PR Creation
+
+Control whether the codegen agent is able to create pull requests in your repositories in response to user requests.
+
+**When enabled:**
+
+* Agents can create new pull requests with code changes
+* PRs include detailed descriptions and context
+* Automatic linking to related issues and discussions
+* Supports your standard code review workflow
+
+**When disabled:**
+
+* Agents can still analyze code and provide suggestions
+* Code changes are proposed but not committed
+* Manual PR creation required for implementing changes
+* Useful for read-only or advisory agent roles
+
+### Enable Rules Detection
+
+Allow the agent to automatically detect and apply rules from various rule files in your repositories. You can also configure manual repository rules at [codegen.com/settings/repo-rules](http://localhost:3001/settings/repo-rules).
+
+**Supported rule file formats:**
+
+* `.cursorrules` - Cursor AI editor rules
+* `.cursor/rules/*.mdc` - Structured rule files in Cursor directory
+* `.windsurfrules` - Windsurf AI editor rules
+* `CLAUDE.md` - Claude-specific instructions
+* `AGENTS.md` - General agent instructions
+* `AGENT.md` - Agent-specific rules
+
+**When enabled:**
+
+* Agents automatically discover and apply repository-specific rules
+* Rules are version-controlled alongside your code
+* Consistent behavior across team members and environments
+* Supports existing AI editor workflows
+
+**When disabled:**
+
+* Only manually configured repository rules are applied
+* No automatic file-based rule detection
+* Simpler rule management through web interface only
+
+### Enforce Organization-wide Signed Commits
+
+When enabled, **ALL** repositories in this organization will be required to use signed commits via GitHub's API. Individual repositories cannot override this security policy.
+
+**Security benefits:**
+
+* Cryptographic verification of commit authenticity
+* Enhanced audit trail for code changes
+* Compliance with security policies requiring commit signing
+* Protection against commit impersonation
+
+**Important considerations:**
+
+* This is an organization-wide enforcement policy
+* Individual repositories cannot disable this requirement
+* Ensures consistent security posture across all projects
+* May require additional setup for team members' GPG keys
+
+<Warning>
+  Enabling organization-wide signed commits affects all repositories and cannot
+  be overridden at the repository level. Ensure your team is prepared for this
+  requirement before enabling.
+</Warning>
+
+## Configuration
+
+Agent permissions are configured at the organization level and provide security boundaries for all agent operations within your organization.
+
+Access your agent permissions at:
+
+<Card title="Configure Agent Permissions" icon="shield-check" href="https://codegen.com/settings/permissions">
+  Control what actions agents are allowed to perform in your organization.
+</Card>
+
+## Best Practices
+
+**Start Conservative:**
+
+* Begin with limited permissions and expand as trust builds
+* Enable rules detection to leverage existing team practices
+* Consider PR creation permissions based on repository criticality
+
+**Security Considerations:**
+
+* Enable signed commits for organizations with compliance requirements
+* Review agent-created PRs before merging, especially initially
+* Monitor agent activity through analytics and audit logs
+
+**Team Alignment:**
+
+* Ensure team understands which permissions are enabled
+* Provide training on rule file formats if using rules detection
+* Establish clear processes for agent-created PRs
+
+<Note>
+  Permission settings provide essential guardrails for agent operations while
+  maintaining the flexibility to customize based on your organization's security
+  and workflow requirements.
+</Note>

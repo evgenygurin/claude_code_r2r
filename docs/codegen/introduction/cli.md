@@ -1,0 +1,91 @@
+# Codegen CLI
+
+export const CODEGEN_SDK_GITHUB_URL = "https://github.com/codegen-sh/codegen-sdk";
+
+export const COMMUNITY_SLACK_URL = "https://community.codegen.com";
+
+The `codegen` CLI is your terminal interface to Codegen agents. Use it to view agents, pull their work, create new agents, and run Claude Code with full telemetry and monitoring.
+
+<Frame>
+  <video controls src="https://res.cloudinary.com/dbikr6pew/video/upload/v1757974837/CLI_pzot3r.mp4" allowFullScreen className="aspect-[3840/2160]" />
+</Frame>
+
+It also wraps your local Claude Code, surfaces traces in the web UI for remote telemetry and analytics, and provides access to your Codegen integrations via MCP injection.
+
+## Installation & Setup
+
+```bash
+uv tool install codegen
+```
+
+The CLI uses your API token for authentication. Get your token and organization ID from the **[authentication guide](/api-reference/authentication)**.
+
+```bash
+codegen login
+```
+
+## Key Commands
+
+### `codegen`
+
+Launches the interactive terminal UI (TUI) for browsing agents, viewing runs, and managing your Codegen workflow from the terminal.
+
+### `codegen login`
+
+Store your API token for authentication. Supports both interactive login and direct token input.
+
+```bash
+# Interactive login
+codegen login
+
+# Direct token login
+codegen login --token YOUR_API_TOKEN
+```
+
+### `codegen update`
+
+Keep your CLI up to date with the latest features and improvements. The CLI automatically checks for updates daily and notifies you when new versions are available.
+
+```bash
+# Update to latest version
+codegen update
+
+# Check for updates without installing
+codegen update --check
+
+# Update to a specific version
+codegen update --version 1.2.3
+
+# Preview changes without updating
+codegen update --dry-run
+```
+
+## What You Can Do
+
+* **View and manage agents** - List agent runs, check status, and see detailed execution logs
+* **Pull agent work** - Download branches and code changes created by agents directly to your local environment
+* **Create new agents** - Trigger agent runs from the command line with custom prompts
+* **Run Claude Code** - Execute Claude Code with OpenTelemetry monitoring and comprehensive logging
+* **Manage organizations** - Switch between organizations and configure repositories
+* **Stay up to date** - Built-in self-update system with automatic update notifications
+
+<Note>
+  The CLI provides the same capabilities as the web UI and API, optimized for
+  terminal-based workflows and automation.
+</Note>
+
+## Full Demo
+
+<iframe className="w-full aspect-video rounded-xl" src="https://youtube.com/embed/sQ2XOonma0w" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+
+## Get Started
+
+<CardGroup cols={2}>
+  <Card title="Create Account" icon="user-plus" href="https://codegen.sh/login">
+    Sign up for a free account and get your API token.
+  </Card>
+
+  <Card title="View on GitHub" icon="github" href={CODEGEN_SDK_GITHUB_URL}>
+    Star us on GitHub and contribute to the project.
+  </Card>
+</CardGroup>
