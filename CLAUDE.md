@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - RAG-powered ответов на вопросы о проекте
 - Работы в фоновом режиме без блокировки пользователя
 
-**Статус**: Phase 4 - Technical Specification (70% завершено)
+**Статус**: Phase 4 - Technical Specification (85% завершено)
 
 **R2R Instance**: http://136.119.36.216:7272
 
@@ -28,7 +28,7 @@ Layer 5: Slash Commands → /r2r-search, /r2r-ask, /r2r-update-docs
 
 ```text
 docs/
-├── @analysis/              # Техническая спецификация (6,512 строк)
+├── @analysis/              # Техническая спецификация (11,500+ строк)
 │   ├── README.md           # Статус проекта и roadmap
 │   ├── 00_REVIEW.md        # Критический обзор (15 gaps, 5 рисков)
 │   ├── 01_r2r_capabilities.md          # R2R API анализ
@@ -36,7 +36,9 @@ docs/
 │   ├── 02_claude_code_capabilities.md  # 7 механизмов расширения
 │   ├── 03_integration_mapping.md       # Архитектурные паттерны
 │   ├── 04_mcp_server_specification.md  # MCP Server (1,512 строк)
-│   └── 05_data_consistency_strategy.md # Race conditions решение
+│   ├── 05_data_consistency_strategy.md # Race conditions (1,033 строк)
+│   ├── 06_testing_strategy.md          # Testing approach (2,200+ строк)
+│   └── 07_implementation_roadmap.md    # 14-week plan (2,800+ строк)
 ├── @critical/              # Критические отчеты
 │   ├── 01_critical_issues.md    # Проблемы и их статус
 │   └── 02_key_decisions.md      # Ключевые архитектурные решения
@@ -156,32 +158,35 @@ File Modification → PostToolUse Hook → UpdateQueue → UpdateWorker → R2R 
 2. **docs/@analysis/00_REVIEW.md** - Критический обзор: gaps, риски, возможности
 3. **docs/@analysis/04_mcp_server_specification.md** - MCP Server архитектура
 4. **docs/@analysis/05_data_consistency_strategy.md** - Решение race conditions
+5. **docs/@analysis/06_testing_strategy.md** - Comprehensive testing approach
+6. **docs/@analysis/07_implementation_roadmap.md** - 14-week phase-by-phase plan
 
 ### Для глубокого понимания:
 
-5. **docs/@analysis/01a_r2r_api_gaps_filled.md** - Заполненные пробелы R2R API
-6. **docs/@analysis/03_integration_mapping.md** - 4 архитектурных паттерна
-7. **docs/@critical/02_key_decisions.md** - Обоснование ключевых решений
+7. **docs/@analysis/01a_r2r_api_gaps_filled.md** - Заполненные пробелы R2R API
+8. **docs/@analysis/03_integration_mapping.md** - 4 архитектурных паттерна
+9. **docs/@critical/02_key_decisions.md** - Обоснование ключевых решений
 
 ## 🚧 Текущий статус разработки
 
-### Completed ✅ (70%)
+### Completed ✅ (85%)
 
 - ✅ R2R API Analysis
 - ✅ Claude Code Integration Analysis (7 механизмов)
 - ✅ Architecture Design (Hybrid 5-layer)
 - ✅ MCP Server Specification (1,512 строк)
-- ✅ Data Consistency Strategy
+- ✅ Data Consistency Strategy (1,033 строк)
 - ✅ Critical Review (15 gaps заполнено)
+- ✅ Testing Strategy (2,200+ строк)
+- ✅ Implementation Roadmap (2,800+ строк)
 
-### In Progress 🔄 (15%)
+### In Progress 🔄 (5%)
 
-- 🔄 Testing Strategy
+- 🔄 Code Examples
 
-### Pending ⏭️ (15%)
+### Pending ⏭️ (10%)
 
-- ⏭️ Implementation Roadmap
-- ⏭️ Code Examples
+- ⏭️ Final Review and Readiness Assessment
 
 ## 📋 Roadmap (14 недель)
 
