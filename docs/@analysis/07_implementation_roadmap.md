@@ -1865,29 +1865,46 @@ Phase 0 (R2R Exploration)
 
 ### Infrastructure Requirements
 
-**Development:**
+**🔒 Infrastructure Phasing Strategy:**
+
+| Component | Phases 0-4 (Development) | Phase 5 (Production) |
+|-----------|-------------------------|---------------------|
+| **Cache** | In-memory cache | Redis cluster |
+| **Monitoring** | Structured logging only | Prometheus + Grafana |
+| **Metrics** | Basic counters | Full dashboards |
+
+**Rationale:**
+- ✅ Reduced complexity during development (Phases 0-4)
+- ✅ Faster iteration without external dependencies
+- ✅ Same code interface, easy migration to production infrastructure
+- ✅ Production-grade monitoring added only when needed (Phase 5)
+
+---
+
+**Development (Phases 0-4):**
 - 3-5 development machines
 - Local R2R instances (Docker)
-- Local Redis (Docker)
+- ~~Local Redis~~ → **In-memory cache (no external dependency)**
 - GitHub repository
+- **No Prometheus/Grafana** → Structured JSON logging only
 
-**Staging:**
+**Staging (Phase 4 end):**
 - 1 VM or Kubernetes cluster
 - R2R instance (shared or dedicated)
-- Redis instance (managed or self-hosted)
-- Monitoring (Prometheus + Grafana)
+- ~~Redis instance~~ → **In-memory cache still acceptable**
+- ~~Monitoring~~ → **Structured logging + basic health checks**
 
-**Production:**
+**Production (Phase 5):**
 - 2+ VMs or Kubernetes pods (for redundancy)
 - Production R2R instance
-- Redis cluster (managed, e.g., AWS ElastiCache)
-- Monitoring (Prometheus + Grafana)
+- **Redis cluster** (managed, e.g., AWS ElastiCache) - **added in Phase 5**
+- **Monitoring** (Prometheus + Grafana) - **added in Phase 5**
 - Logging (optional: ELK or cloud logging)
 
 **Cost Estimate (monthly, AWS):**
-- Development: $0 (local Docker)
-- Staging: $50-100 (t3.medium VM + managed Redis)
-- Production: $200-500 (t3.large VMs + ElastiCache + monitoring)
+- Development (Phases 0-4): **$0** (local Docker, no Redis, no monitoring)
+- Staging (Phase 4): **$30-50** (t3.small VM only)
+- Production (Phase 5): **$200-500** (t3.large VMs + ElastiCache + Prometheus/Grafana)
 
 ---
 

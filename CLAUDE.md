@@ -188,6 +188,22 @@ File Modification → PostToolUse Hook → UpdateQueue → UpdateWorker → R2R 
 
 - ⏭️ Final Review and Readiness Assessment
 
+### Deferred 🔒 (Infrastructure - Phase 5 Only)
+
+**Monitoring & Caching Infrastructure (postponed to Phase 5):**
+- 🔒 **Redis** - deferred to Phase 5 (use in-memory cache for Phases 0-4)
+- 🔒 **Prometheus** - deferred to Phase 5 (use structured logging instead)
+- 🔒 **Grafana** - deferred to Phase 5 (use log analysis instead)
+
+**Rationale:**
+- ✅ Reduced complexity during development (Phases 0-4)
+- ✅ Faster iteration without external dependencies
+- ✅ Lower infrastructure costs ($0 vs $200-500/month)
+- ✅ Same code interface - easy migration to Redis in Phase 5
+- ✅ Focus on core functionality first
+
+**See:** `docs/@critical/05_infrastructure_decisions.md` for details
+
 ## 📋 Roadmap (14 недель)
 
 ```text
