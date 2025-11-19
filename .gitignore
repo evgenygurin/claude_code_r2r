@@ -1,0 +1,37 @@
+     STDIN
+   1 # OS
+   2 .DS_Store
+   3 *.swp
+   4 *.swo
+   5 *~
+   6 
+   7 # IDE
+   8 .idea/
+   9 .vscode/
+  10 *.iml
+  11 
+  12 # Node
+  13 node_modules/
+  14 npm-debug.log
+  15 yarn-error.log
+  16 dist/
+  17 build/
+  18 
+  19 # Python
+  20 __pycache__/
+  21 *.py[cod]
+  22 *$py.class
+  23 *.so
+  24 .Python
+  25 env/
+  26 venv/
+  27 .env
+  28 
+  29 # Logs
+  30 *.log
+  31 logs/
+  32 
+  33 # Temporary
+  34 tmp/
+  35 temp/
+  36 .cache/
