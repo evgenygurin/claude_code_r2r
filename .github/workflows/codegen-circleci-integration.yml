@@ -74,21 +74,47 @@ jobs:
         env:
           CODEGEN_API_KEY: ${{ secrets.CODEGEN_API_KEY }}
           CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+          PR_NUMBER: ${{ steps.parse-circleci.outputs.pr_number }}
+          BUILD_URL: ${{ steps.parse-circleci.outputs.build_url }}
         run: |
-          LOGS=$(cat all-logs.txt | jq -Rs .)
+          # Create payload with logs
+          logs_content=$(cat all-logs.txt | head -c 10000)  # Limit to 10KB
           
-          curl -X POST "https://api.codegen.com/v1/organizations/${CODEGEN_ORG_ID}/agent/run" \
+          cat > /tmp/circleci_payload.json << 'EOFPAYLOAD'
+          {
+            "prompt": "Fix the failing CircleCI checks for PR #PR_NUM. Analyze the build logs and push fixes.\n\nCircleCI Build: BUILD_URL_PLACEHOLDER\n\nLogs excerpt:\nLOGS_PLACEHOLDER",
+            "repo_id": REPO_ID_PLACEHOLDER,
+            "metadata": {
+              "circleci_build_url": "BUILD_URL_PLACEHOLDER",
+              "pr_number": PR_NUM,
+              "source": "circleci_integration"
+            }
+          }
+          EOFPAYLOAD
+          
+          # Replace placeholders
+          sed -i "s|REPO_ID_PLACEHOLDER|${{ github.repository_id }}|g" /tmp/circleci_payload.json
+          sed -i "s|PR_NUM|${PR_NUMBER}|g" /tmp/circleci_payload.json
+          sed -i "s|BUILD_URL_PLACEHOLDER|${BUILD_URL}|g" /tmp/circleci_payload.json
+          sed -i "s|LOGS_PLACEHOLDER|$(echo "$logs_content" | head -n 50 | sed 's/[\/&]/\\&/g')|g" /tmp/circleci_payload.json
+          
+          # Make API call
+          response=$(curl -s -w "\n%{http_code}" \
+            -X POST "https://api.codegen.com/v1/organizations/${CODEGEN_ORG_ID}/agent/run" \
             -H "Authorization: Bearer ${CODEGEN_API_KEY}" \
             -H "Content-Type: application/json" \
-            -d "{
-              \"prompt\": \"Fix the failing CircleCI checks. Analyze the logs and push fixes to PR #${{ steps.parse-circleci.outputs.pr_number }}.\",
-              \"repo_id\": ${{ github.repository_id }},
-              \"metadata\": {
-                \"circleci_build_url\": \"${{ steps.parse-circleci.outputs.build_url }}\",
-                \"pr_number\": ${{ steps.parse-circleci.outputs.pr_number }},
-                \"logs\": ${LOGS}
-              }
-            }"
+            -d @/tmp/circleci_payload.json)
+          
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+          
+          if [ "$http_code" -ne 200 ]; then
+            echo "::error::Failed to trigger Codegen fix: $body"
+            exit 1
+          fi
+          
+          echo "AGENT_RUN_ID=$(echo "$body" | jq -r '.id')" >> $GITHUB_ENV
+          echo "✅ Codegen fix triggered"
       
       - name: Comment on PR
         uses: actions/github-script@v7

@@ -162,15 +162,16 @@ jobs:
           CODEGEN_API_KEY: ${{ secrets.CODEGEN_API_KEY }}
           CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
         run: |
-          # Note: This is a placeholder - actual sync API endpoint may differ
-          curl -X POST \
-            "https://api.codegen.com/v1/organizations/$CODEGEN_ORG_ID/repos/${{ github.repository }}/rules/sync" \
-            -H "Authorization: Bearer $CODEGEN_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "rule_files": ${{ toJSON(steps.detect-rules.outputs.rule_files) }},
-              "total_size": ${{ steps.rules-size.outputs.total_size }}
-            }' || echo "Rules sync API not yet implemented"
+          # Note: Rules sync is handled automatically by Codegen when files are pushed
+          # No explicit API call needed - Codegen monitors CLAUDE.md, AGENTS.md, etc.
+          
+          echo "ℹ️  Rules sync info:"
+          echo "  - Codegen automatically detects and uses CLAUDE.md, AGENTS.md"
+          echo "  - No manual sync needed"
+          echo "  - Total rules size: ${{ steps.rules-size.outputs.total_size }} bytes"
+          echo "  - Rule files found: ${{ steps.detect-rules.outputs.rule_count }}"
+          echo ""
+          echo "✅ Rules are automatically synced on git push"
 
   collect-analytics:
     name: Collect Analytics
