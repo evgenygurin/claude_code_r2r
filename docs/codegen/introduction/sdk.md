@@ -1,0 +1,79 @@
+# Python SDK
+
+export const CODEGEN_SDK_GITHUB_URL = "https://github.com/codegen-sh/codegen-sdk";
+
+export const COMMUNITY_SLACK_URL = "https://community.codegen.com";
+
+The [Codegen SDK](https://github.com/codegen-sh/codegen-sdk) is a thin pythonic wrapper around the **[Codegen API](/api-reference/overview)** with all the same capabilities for creating and managing AI agents programmatically.
+
+<Tip>
+  Go to [developer settings](https://codegen.sh/token) to generate an API token
+</Tip>
+
+```python
+from codegen import Agent
+
+# Initialize the Agent with your organization ID and API token
+agent = Agent(org_id="...", token="...")
+
+# Run an agent with a prompt
+task = agent.run(prompt="Leave a review on PR #123")
+
+# Check the initial status
+print(task.status)
+
+# Refresh the task to get updated status (tasks can take time)
+task.refresh()
+
+if task.status == "completed":
+    print(task.result)  # Result often contains code, summaries, or links
+```
+
+## Installation
+
+Install the [codegen](https://pypi.org/project/codegen/) package from PyPI using your preferred package manager:
+
+```bash
+# Using pip
+pip install codegen
+
+# Using pipx (for CLI usage)
+pipx install codegen
+
+# Using uv
+uv pip install codegen
+# or
+uv tool install codegen
+```
+
+### Keeping Up to Date
+
+The CLI includes a built-in self-update system that checks for updates daily:
+
+```bash
+# Update to latest version
+codegen update
+
+# Check for updates
+codegen update --check
+```
+
+## Get Started
+
+<CardGroup cols={2}>
+  <Card title="Create Account" icon="user-plus" href="https://codegen.sh/login">
+    Sign up for a free account and get your API token.
+  </Card>
+
+  <Card title="Join our Slack" icon="slack" href={COMMUNITY_SLACK_URL}>
+    Get help and connect with the Codegen community.
+  </Card>
+
+  <Card title="Tutorials" icon="diagram-project" href="/tutorials/at-a-glance">
+    Learn how to use Codegen for common code transformation tasks.
+  </Card>
+
+  <Card title="View on GitHub" icon="github" href={CODEGEN_SDK_GITHUB_URL}>
+    Star us on GitHub and contribute to the project.
+  </Card>
+</CardGroup>

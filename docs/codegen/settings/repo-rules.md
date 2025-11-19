@@ -1,0 +1,150 @@
+# Agent Rules
+
+Agent rules are text prompts that provide instructions to AI agents about coding standards, conventions, and preferences. These text-based rules are automatically injected into the agent's context during each task.
+
+<Frame>
+  <video controls src="https://res.cloudinary.com/dbikr6pew/video/upload/v1757977539/Rules_evkkhx.mp4" className="aspect-[3356/2160]" />
+</Frame>
+
+## How Agent Rules Work
+
+When an agent starts working, it receives all applicable rules as text prompts in its context:
+
+1. **[User Rules](https://codegen.com/settings/personal-prompts)** - Your personal coding preferences and style
+2. **[Organization Rules](https://codegen.com/settings/organization-rules)** - Organization-wide standards and conventions
+3. **[Repository Rules](https://codegen.com/repos)** - Project-specific requirements and guidelines
+
+The agent is instructed to prefer **User > Repository > Organization** rules when there are conflicts, but these are guidance rather than hard constraints. The agent considers all rules as context when making decisions.
+
+<Note>
+  Rules are text prompts, not strict settings. Agents use them as guidance
+  alongside the specific task you've given them.
+</Note>
+
+<Tip>
+  Codegen automatically detects `AGENTS.md` and other rules files. [Learn
+  more](#automatic-rule-file-detection)
+</Tip>
+
+## Automatic Rule File Detection
+
+In addition to manual repository rules, Codegen automatically discovers and includes agent rule files from your repository when the agent starts working on it. This happens automatically whenever the `set_active_codebase` tool is used.
+
+### Supported Rule File Patterns
+
+Codegen automatically searches for the following types of rule files in your repository:
+
+<Note>
+  You can customize which rule file patterns to match by configuring glob
+  patterns in your repository settings at
+  [codegen.com/repos](https://codegen.com/repos) (select your repository, then
+  configure rule file patterns).
+</Note>
+
+* **`AGENTS.md`** - preferred default. [Learn more](https://agents.md)
+* **`CLAUDE.md`** - Claude assistant rules
+* **`.cursorrules`** - Cursor AI editor rules
+* **`.clinerules`** - Cline AI assistant rules
+* **`.windsurfrules`** - Windsurf AI editor rules
+* **`**/\*.mdc`** - Markdown files with `.mdc` extension anywhere in the repository
+* **`.cursor/rules/**/\*.mdc`** - Markdown files in the `.cursor/rules/` directory structure
+
+### How Automatic Detection Works
+
+1. **File Discovery**: When you switch to a repository, Codegen uses `ripgrep` to search for files matching the supported patterns
+2. **Content Extraction**: The content of discovered files is read and processed
+
+* **New**: The content is encoded to preserve formatting during transport, then decoded before being presented to the agent
+
+3. **Size Limitation (25k global budget)**: All rule files combined are truncated to fit within a 25,000 character global budget to ensure optimal performance
+4. **Context Integration**: The rule content is automatically included in the agent's context alongside any manual repository rules
+
+### Example Rule Files
+
+Here are examples of how you might structure agent rules in your repository:
+
+**`AGENTS.md` example:**
+
+```markdown
+# Backend Development Rules
+
+## Database
+
+- Use Prisma for database operations
+- Always use transactions for multi-step operations
+- Include proper error handling for all database calls
+
+## API Design
+
+- Follow REST conventions
+- Use proper HTTP status codes
+- Include request/response validation
+```
+
+### Visibility in UI
+
+When rules are discovered, they are displayed in the AgentTrace under the `SetActiveCodebase` tool card as "Repository Rules (Filesystem)". You can expand each entry to preview the content and open the source file on GitHub.
+
+### Benefits of Automatic Rule Files
+
+* **Version Control**: Rule files are committed with your code, ensuring consistency across team members
+* **Repository-Specific**: Different repositories can have different rule files without manual configuration
+* **Developer-Friendly**: Developers can manage rules using familiar file-based workflows
+* **Editor Integration**: Many AI-powered editors already support these file formats
+
+<Tip>
+  Automatic rule files work alongside manual repository rules. Both types of
+  rules are combined and provided to the agent for maximum context.
+</Tip>
+
+<Warning>
+  If your rule files exceed the global 25,000 character budget, they will be
+  truncated per-file and/or at the aggregate level. Keep rule files concise or
+  split them into focused files.
+</Warning>
+
+## Common Use Cases and Examples
+
+Agent rules are flexible and can be used for various purposes across different levels:
+
+### User-Level Rules Examples
+
+Perfect for personal preferences that should apply across all your work:
+
+* **Personal Coding Style:**
+  * "I prefer functional programming patterns over object-oriented when possible."
+  * "Always include detailed JSDoc comments for functions with more than 2 parameters."
+* **Workflow Preferences:**
+  * "Include performance considerations in code reviews for any loops or database queries."
+  * "Prefer explicit error handling over try-catch blocks when the error is expected."
+* **Tool Preferences:**
+  * "Use my preferred linting configuration and code formatting style."
+  * "Always suggest using TypeScript strict mode for new projects."
+
+### Organization-Level Rules Examples
+
+Perfect for organization-wide standards that should apply to all repositories:
+
+* **Coding Standards:**
+  * "All code must follow our organization's style guide. Use Prettier for JavaScript/TypeScript formatting."
+  * "All API endpoints must include proper error handling and logging."
+* **Security Requirements:**
+  * "Never commit API keys, passwords, or other secrets to the repository."
+  * "All database queries must use parameterized statements to prevent SQL injection."
+* **Process Requirements:**
+  * "All commit messages must follow the Conventional Commits specification."
+  * "Every PR must include tests for new functionality."
+
+### Repository-Level Rules Examples
+
+Perfect for repository-specific requirements that may override organization defaults:
+
+* **Technology-Specific Rules:**
+  * "This is a Python project. Use `black` for formatting and `pytest` for testing."
+  * "This legacy repository uses JavaScript instead of our organization's TypeScript standard."
+* **Project-Specific Information:**
+  * "All new backend code should be in the `/server/src` directory."
+  * "Avoid using deprecated function `old_function()`. Use `new_function()` instead."
+* **Build and Deployment:**
+  * "Run `npm run build` before committing to ensure the build passes."
+  * "This repository deploys automatically on merge to main - ensure all tests pass."

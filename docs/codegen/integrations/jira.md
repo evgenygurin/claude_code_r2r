@@ -1,0 +1,79 @@
+# Jira Integration
+
+export const COMMUNITY_SLACK_URL = "https://community.codegen.com";
+
+Integrate Codegen with your Jira workspace to allow agents to interact with issues, manage projects, and keep your team updated.
+
+<img src="https://mintcdn.com/codegeninc/TEOdIY76pi_ZHrje/images/jira.png?fit=max&auto=format&n=TEOdIY76pi_ZHrje&q=85&s=faa048b11240679b0bdf659c32c83847" className="rounded-lg" data-og-width="1370" width="1370" data-og-height="1180" height="1180" data-path="images/jira.png" data-optimize="true" data-opv="3" srcset="https://mintcdn.com/codegeninc/TEOdIY76pi_ZHrje/images/jira.png?w=280&fit=max&auto=format&n=TEOdIY76pi_ZHrje&q=85&s=90a693fb0b60014cc265b097b8648ba4 280w, https://mintcdn.com/codegeninc/TEOdIY76pi_ZHrje/images/jira.png?w=560&fit=max&auto=format&n=TEOdIY76pi_ZHrje&q=85&s=140e8a61266014a56d902e9395ff84e5 560w, https://mintcdn.com/codegeninc/TEOdIY76pi_ZHrje/images/jira.png?w=840&fit=max&auto=format&n=TEOdIY76pi_ZHrje&q=85&s=5990a32baab64bf779b986a8d09e3fc6 840w, https://mintcdn.com/codegeninc/TEOdIY76pi_ZHrje/images/jira.png?w=1100&fit=max&auto=format&n=TEOdIY76pi_ZHrje&q=85&s=a8ba8e4188d2de52356719fe0c57c5c2 1100w, https://mintcdn.com/codegeninc/TEOdIY76pi_ZHrje/images/jira.png?w=1650&fit=max&auto=format&n=TEOdIY76pi_ZHrje&q=85&s=2913fa6ddff373a266e1c5975afabc4c 1650w, https://mintcdn.com/codegeninc/TEOdIY76pi_ZHrje/images/jira.png?w=2500&fit=max&auto=format&n=TEOdIY76pi_ZHrje&q=85&s=3919d00e87b3b1eee6b9098b23d68a4d 2500w" />
+
+## Installation
+
+Connect your Jira workspace to Codegen to enable agent interactions.
+
+<Card title="Connect Jira Workspace" icon="jira" href="https://codegen.com/integrations/jira">
+  Authorize Codegen to access your Jira workspace and project data.
+</Card>
+
+<Note>
+  The Jira integration is currently in <b>beta</b>. Please reach out in the{" "}
+  <a href={COMMUNITY_SLACK_URL}>community</a> to have it enabled for your
+  Codegen account.
+</Note>
+
+## Step-by-Step Setup Guide
+
+Follow these steps to successfully connect Codegen to your Jira workspace:
+
+### 1. Enable User-Installed Apps in Jira
+
+* In your Jira workspace, ensure that **user-installed apps** are enabled.
+* Make sure the setting to allow user-installed apps is enabled. This is required for the Codegen integration to work properly.
+
+<Note>
+  If you don't have admin access to enable user-installed apps, contact your
+  Jira administrator to enable this setting before proceeding.
+</Note>
+
+### 2. Create a Dedicated Jira User for Codegen
+
+* In your Jira workspace, create a new user account specifically for Codegen.
+* **Email:** Use an address with `codegen` in it, like `yourname+codegen@company_domain.com` or `codegen@company_domain.com`.
+* **Name:** Set the user's name to **Codegen**. This makes it easy to identify actions performed by Codegen in Jira.
+
+### 3. Authorize Codegen with the New Jira User
+
+* Log in to Jira as the new Codegen user.
+* Go to [Codegen's Jira Integration page](https://codegen.com/integrations/jira).
+* Click **Connect Jira Workspace** and complete the OAuth flow **using the Codegen Jira user** you just created.
+
+<Warning>
+  Make sure you are logged in as the Codegen Jira user when authorizing access.
+  This is to ensure Codegen acts on behalf of the new user and not your personal
+  account.
+</Warning>
+
+### 4. Switch Back to Your Own Jira Account
+
+* After connecting, log out of the Codegen Jira user in Jira.
+* Log back in with your personal Jira account.
+
+### 5. Use Codegen in Your Workflow
+
+* On any Jira ticket, `@mention` the Codegen user (e.g., `@Codegen`) to assign or notify Codegen about the issue.
+* Codegen will interact with the ticket, update statuses, add comments, and link PRs as needed.
+
+## Capabilities
+
+The Jira integration provides read and write access, enabling agents to manage tasks effectively:
+
+* **Read Access:** Fetch issue details, read comments, view project status, list team members.
+* **Write Access:** Update issue status (e.g., to "In Progress", "Done"), add comments, link GitHub PRs to issues, create new issues, assign tasks.
+
+## How Agents Use Jira
+
+Agents use the Jira integration to streamline project management:
+
+* **Track Work:** Automatically update the status of issues they are working on.
+* **Link Code:** Connect implemented changes (GitHub PRs) directly to the relevant Jira issue.
+* **Provide Updates:** Post comments on issues with progress reports, results, or questions.
+* **Create Tasks:** Generate new issues for follow-up work, bugs discovered, or sub-tasks.
