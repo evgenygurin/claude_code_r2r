@@ -57,26 +57,57 @@ jobs:
         env:
           CODEGEN_API_KEY: ${{ secrets.CODEGEN_API_KEY }}
           CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
-        run: |
-          curl -X POST "https://api.codegen.com/v1/organizations/${CODEGEN_ORG_ID}/agent/run" \
-            -H "Authorization: Bearer ${CODEGEN_API_KEY}" \
-            -H "Content-Type: application/json" \
-            -d "{
-              \"prompt\": \"${PROMPT}\",
-              \"repo_id\": ${REPO_ID},
-              \"metadata\": {
-                \"github_context\": \"${CONTEXT_TYPE}\",
-                \"issue_number\": ${ISSUE_NUMBER},
-                \"triggered_by\": \"${GITHUB_ACTOR}\"
-              }
-            }"
-        env:
           PROMPT: ${{ steps.context.outputs.prompt }}
           CONTEXT_TYPE: ${{ steps.context.outputs.context_type }}
           ISSUE_NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
           REPO_ID: ${{ github.repository_id }}
+        run: |
+          # Create JSON payload file to avoid escaping issues
+          cat > /tmp/payload.json << 'EOFPAYLOAD'
+          {
+            "prompt": "$PROMPT_PLACEHOLDER",
+            "repo_id": $REPO_ID_PLACEHOLDER,
+            "metadata": {
+              "github_context": "$CONTEXT_TYPE_PLACEHOLDER",
+              "issue_number": $ISSUE_NUMBER_PLACEHOLDER,
+              "triggered_by": "$TRIGGERED_BY_PLACEHOLDER"
+            }
+          }
+          EOFPAYLOAD
+          
+          # Replace placeholders with actual values
+          sed -i "s/\$PROMPT_PLACEHOLDER/$(echo "$PROMPT" | sed 's/[\/&]/\\&/g')/g" /tmp/payload.json
+          sed -i "s/\$REPO_ID_PLACEHOLDER/${REPO_ID}/g" /tmp/payload.json
+          sed -i "s/\$CONTEXT_TYPE_PLACEHOLDER/${CONTEXT_TYPE}/g" /tmp/payload.json
+          sed -i "s/\$ISSUE_NUMBER_PLACEHOLDER/${ISSUE_NUMBER}/g" /tmp/payload.json
+          sed -i "s/\$TRIGGERED_BY_PLACEHOLDER/${GITHUB_ACTOR}/g" /tmp/payload.json
+          
+          # Make API call
+          response=$(curl -s -w "\n%{http_code}" \
+            -X POST "https://api.codegen.com/v1/organizations/${CODEGEN_ORG_ID}/agent/run" \
+            -H "Authorization: Bearer ${CODEGEN_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d @/tmp/payload.json)
+          
+          # Extract HTTP status code
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+          
+          # Check for errors
+          if [ "$http_code" -ne 200 ]; then
+            echo "::error::Codegen API call failed with status $http_code"
+            echo "Response: $body"
+            exit 1
+          fi
+          
+          # Save agent run ID for acknowledgment
+          echo "AGENT_RUN_ID=$(echo "$body" | jq -r '.id')" >> $GITHUB_ENV
+          echo "AGENT_WEB_URL=$(echo "$body" | jq -r '.web_url')" >> $GITHUB_ENV
+          
+          echo "✅ Agent run created successfully (ID: $(echo "$body" | jq -r '.id'))"
       
       - name: Acknowledge Trigger
+        if: env.AGENT_RUN_ID != ''
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -84,9 +115,15 @@ jobs:
             const issueNumber = context.payload.issue?.number || 
                               context.payload.pull_request?.number;
             
+            const agentRunId = process.env.AGENT_RUN_ID;
+            const webUrl = process.env.AGENT_WEB_URL || 'https://codegen.com/agents';
+            
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issueNumber,
-              body: '🤖 Codegen agent triggered! I\'ll start working on this shortly.\n\nTrack progress at: https://codegen.com/agents'
+              body: `🤖 **Codegen agent triggered!**\n\n` +
+                    `Agent Run ID: \`${agentRunId}\`\n` +
+                    `Track progress at: ${webUrl}\n\n` +
+                    `The agent will start working on this shortly.`
             });

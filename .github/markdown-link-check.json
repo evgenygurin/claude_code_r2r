@@ -7,18 +7,28 @@
       "pattern": "^http://127.0.0.1"
     },
     {
-      "pattern": "^http://136.119.36.216:7272"
+      "pattern": "^http://136.119.36.216"
     },
     {
-      "pattern": "^https://codegen.com/agents/"
+      "pattern": "^https://codegen.com/agents"
+    },
+    {
+      "pattern": "^https://api.codegen.com"
     }
   ],
-  "replacementPatterns": [],
+  "replacementPatterns": [
+    {
+      "pattern": "^/",
+      "replacement": "{{BASEURL}}/"
+    }
+  ],
   "httpHeaders": [
     {
       "urls": ["https://github.com"],
       "headers": {
-        "Accept-Encoding": "zstd, br, gzip, deflate"
+        "Accept": "application/vnd.github.v3+json",
+        "Accept-Encoding": "zstd, br, gzip, deflate",
+        "User-Agent": "markdown-link-check"
       }
     }
   ],
@@ -26,5 +36,5 @@
   "retryOn429": true,
   "retryCount": 3,
   "fallbackRetryDelay": "30s",
-  "aliveStatusCodes": [200, 206]
+  "aliveStatusCodes": [200, 206, 301, 302, 307, 308]
 }
