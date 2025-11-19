@@ -1,0 +1,29 @@
+================================================================================
+R2R API TESTING FRAMEWORK - DEMONSTRATION REPORT
+================================================================================
+
+Generated: 2025-11-19 02:57:18
+API Endpoint: http://136.119.36.216:7272
+API Version: v3
+
+SUMMARY
+--------------------------------------------------------------------------------
+Total Tests:       49
+Passed:            42
+Failed:            7
+Success Rate:      85.71%
+Avg Response Time: 0.465s
+
+RESULTS BY CATEGORY
+--------------------------------------------------------------------------------
+Health Check & System: 3/3 (100.0%)
+Document Management: 7/10 (70.0%)
+Search Operations: 8/10 (80.0%)
+RAG Generation: 10/10 (100.0%)
+Collections Management: 8/8 (100.0%)
+Authentication: 6/8 (75.0%)
+
+================================================================================
+This was a SIMULATED test run.
+Actual API access requires proper network configuration.
+================================================================================
