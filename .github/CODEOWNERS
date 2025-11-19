@@ -1,0 +1,40 @@
+# CODEOWNERS - Automatic PR reviewers
+
+# Default owners for everything in the repo
+* @evgenygurin
+
+# Documentation
+/docs/ @evgenygurin
+*.md @evgenygurin
+CLAUDE.md @evgenygurin
+AGENTS.md @evgenygurin
+
+# Critical analysis documents
+/docs/@analysis/ @evgenygurin
+/docs/@critical/ @evgenygurin
+
+# MCP Server implementation
+/mcp_server/ @evgenygurin
+
+# Sync system (data consistency)
+/sync_system/ @evgenygurin
+
+# GitHub workflows and configurations
+/.github/ @evgenygurin
+
+# Configuration files
+*.json @evgenygurin
+*.yaml @evgenygurin
+*.yml @evgenygurin
+*.toml @evgenygurin
+
+# Python requirements
+requirements*.txt @evgenygurin
+
+# Codegen-specific files
+/.github/workflows/codegen*.yml @evgenygurin
+/.github/codegen-config.json @evgenygurin
+/.github/ISSUE_TEMPLATE/codegen*.yml @evgenygurin
+
+# Auto-assign Codegen agent for issues
+/.github/ISSUE_TEMPLATE/ @codegen-agent

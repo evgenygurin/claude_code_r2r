@@ -1,0 +1,348 @@
+name: Codegen Sync and Monitoring
+
+# Periodic sync of project state with Codegen and health monitoring
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  
+  workflow_dispatch:
+    inputs:
+      sync_type:
+        description: 'Type of sync to perform'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - rules-only
+          - analytics-only
+          - health-check
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  health-check:
+    name: Codegen Health Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check Codegen API Status
+        id: api-status
+        run: |
+          response=$(curl -s -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CODEGEN_API_KEY }}" \
+            "https://api.codegen.com/v1/organizations/${{ secrets.CODEGEN_ORG_ID }}/health")
+          
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
+          
+          echo "status_code=$http_code" >> $GITHUB_OUTPUT
+          echo "response=$body" >> $GITHUB_OUTPUT
+          
+          if [ "$http_code" -ne 200 ]; then
+            echo "⚠️ Codegen API unhealthy: HTTP $http_code"
+            exit 1
+          fi
+      
+      - name: Check Agent Activity
+        id: agent-activity
+        env:
+          CODEGEN_API_KEY: ${{ secrets.CODEGEN_API_KEY }}
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+        run: |
+          # Get agent runs from last 7 days
+          response=$(curl -s \
+            -H "Authorization: Bearer $CODEGEN_API_KEY" \
+            "https://api.codegen.com/v1/organizations/$CODEGEN_ORG_ID/agent/runs?days=7")
+          
+          total_runs=$(echo "$response" | jq '.total_runs // 0')
+          active_runs=$(echo "$response" | jq '.active_runs // 0')
+          failed_runs=$(echo "$response" | jq '.failed_runs // 0')
+          
+          echo "total_runs=$total_runs" >> $GITHUB_OUTPUT
+          echo "active_runs=$active_runs" >> $GITHUB_OUTPUT
+          echo "failed_runs=$failed_runs" >> $GITHUB_OUTPUT
+          
+          echo "📊 Agent Activity (Last 7 Days):"
+          echo "  Total Runs: $total_runs"
+          echo "  Active: $active_runs"
+          echo "  Failed: $failed_runs"
+      
+      - name: Report Health Status
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const status = {
+              api_status: '${{ steps.api-status.outputs.status_code }}',
+              total_runs: '${{ steps.agent-activity.outputs.total_runs }}',
+              active_runs: '${{ steps.agent-activity.outputs.active_runs }}',
+              failed_runs: '${{ steps.agent-activity.outputs.failed_runs }}',
+              timestamp: new Date().toISOString()
+            };
+            
+            core.summary
+              .addHeading('🤖 Codegen Health Check')
+              .addTable([
+                [{data: 'Metric', header: true}, {data: 'Value', header: true}],
+                ['API Status', status.api_status === '200' ? '✅ Healthy' : '❌ Unhealthy'],
+                ['Total Runs (7d)', status.total_runs],
+                ['Active Runs', status.active_runs],
+                ['Failed Runs', status.failed_runs],
+                ['Check Time', status.timestamp]
+              ])
+              .write();
+
+  sync-rules:
+    name: Sync Repository Rules
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'schedule' ||
+      github.event.inputs.sync_type == 'full' ||
+      github.event.inputs.sync_type == 'rules-only'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Detect Rule Files
+        id: detect-rules
+        run: |
+          # Find all rule files
+          rule_files=""
+          
+          for pattern in "AGENTS.md" "CLAUDE.md" ".cursorrules" ".clinerules" "**/*.mdc"; do
+            if files=$(find . -name "$pattern" -type f 2>/dev/null); then
+              if [ -n "$files" ]; then
+                rule_files="$rule_files\n$files"
+              fi
+            fi
+          done
+          
+          rule_count=$(echo -e "$rule_files" | grep -v '^$' | wc -l)
+          
+          echo "rule_files<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$rule_files" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          echo "rule_count=$rule_count" >> $GITHUB_OUTPUT
+          
+          echo "📋 Found $rule_count rule files"
+      
+      - name: Calculate Rules Size
+        id: rules-size
+        run: |
+          total_size=0
+          
+          while IFS= read -r file; do
+            if [ -f "$file" ]; then
+              size=$(wc -c < "$file")
+              total_size=$((total_size + size))
+              echo "  $file: $size bytes"
+            fi
+          done <<< "${{ steps.detect-rules.outputs.rule_files }}"
+          
+          echo "total_size=$total_size" >> $GITHUB_OUTPUT
+          
+          if [ $total_size -gt 25000 ]; then
+            echo "⚠️ Warning: Total rules size ($total_size bytes) exceeds 25KB limit"
+          else
+            echo "✅ Rules size: $total_size bytes (within 25KB limit)"
+          fi
+      
+      - name: Sync Rules to Codegen
+        env:
+          CODEGEN_API_KEY: ${{ secrets.CODEGEN_API_KEY }}
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+        run: |
+          # Note: This is a placeholder - actual sync API endpoint may differ
+          curl -X POST \
+            "https://api.codegen.com/v1/organizations/$CODEGEN_ORG_ID/repos/${{ github.repository }}/rules/sync" \
+            -H "Authorization: Bearer $CODEGEN_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "rule_files": ${{ toJSON(steps.detect-rules.outputs.rule_files) }},
+              "total_size": ${{ steps.rules-size.outputs.total_size }}
+            }' || echo "Rules sync API not yet implemented"
+
+  collect-analytics:
+    name: Collect Analytics
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'schedule' ||
+      github.event.inputs.sync_type == 'full' ||
+      github.event.inputs.sync_type == 'analytics-only'
+    
+    steps:
+      - name: Fetch Token Usage
+        id: token-usage
+        env:
+          CODEGEN_API_KEY: ${{ secrets.CODEGEN_API_KEY }}
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+        run: |
+          response=$(curl -s \
+            -H "Authorization: Bearer $CODEGEN_API_KEY" \
+            "https://api.codegen.com/v1/organizations/$CODEGEN_ORG_ID/analytics/tokens?days=7")
+          
+          total_tokens=$(echo "$response" | jq '.total_tokens // 0')
+          cost=$(echo "$response" | jq '.estimated_cost // 0')
+          
+          echo "total_tokens=$total_tokens" >> $GITHUB_OUTPUT
+          echo "cost=$cost" >> $GITHUB_OUTPUT
+          
+          echo "💰 Token Usage (Last 7 Days):"
+          echo "  Total Tokens: $total_tokens"
+          echo "  Estimated Cost: \$$cost"
+      
+      - name: Fetch Completion Rates
+        id: completion-rates
+        env:
+          CODEGEN_API_KEY: ${{ secrets.CODEGEN_API_KEY }}
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+        run: |
+          response=$(curl -s \
+            -H "Authorization: Bearer $CODEGEN_API_KEY" \
+            "https://api.codegen.com/v1/organizations/$CODEGEN_ORG_ID/analytics/completion-rates?days=7")
+          
+          success_rate=$(echo "$response" | jq '.success_rate // 0')
+          avg_time=$(echo "$response" | jq '.avg_completion_time // 0')
+          
+          echo "success_rate=$success_rate" >> $GITHUB_OUTPUT
+          echo "avg_time=$avg_time" >> $GITHUB_OUTPUT
+          
+          echo "📈 Completion Rates (Last 7 Days):"
+          echo "  Success Rate: $success_rate%"
+          echo "  Avg Completion Time: ${avg_time}s"
+      
+      - name: Generate Analytics Report
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const analytics = {
+              token_usage: {
+                total_tokens: '${{ steps.token-usage.outputs.total_tokens }}',
+                cost: '${{ steps.token-usage.outputs.cost }}'
+              },
+              completion_rates: {
+                success_rate: '${{ steps.completion-rates.outputs.success_rate }}',
+                avg_time: '${{ steps.completion-rates.outputs.avg_time }}'
+              },
+              period: 'Last 7 Days',
+              timestamp: new Date().toISOString()
+            };
+            
+            core.summary
+              .addHeading('📊 Codegen Analytics')
+              .addHeading('Token Usage', 3)
+              .addTable([
+                [{data: 'Metric', header: true}, {data: 'Value', header: true}],
+                ['Total Tokens', analytics.token_usage.total_tokens],
+                ['Estimated Cost', `$${analytics.token_usage.cost}`]
+              ])
+              .addHeading('Completion Rates', 3)
+              .addTable([
+                [{data: 'Metric', header: true}, {data: 'Value', header: true}],
+                ['Success Rate', `${analytics.completion_rates.success_rate}%`],
+                ['Avg Time', `${analytics.completion_rates.avg_time}s`]
+              ])
+              .addRaw(`\n**Period:** ${analytics.period}`)
+              .addRaw(`\n**Generated:** ${analytics.timestamp}`)
+              .write();
+
+  check-stale-agents:
+    name: Check for Stale Agents
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Find Stale Agents
+        id: stale-agents
+        env:
+          CODEGEN_API_KEY: ${{ secrets.CODEGEN_API_KEY }}
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+        run: |
+          # Get agents running for more than 2 hours
+          response=$(curl -s \
+            -H "Authorization: Bearer $CODEGEN_API_KEY" \
+            "https://api.codegen.com/v1/organizations/$CODEGEN_ORG_ID/agent/runs?status=running&min_duration=7200")
+          
+          stale_count=$(echo "$response" | jq '.agents | length')
+          
+          echo "stale_count=$stale_count" >> $GITHUB_OUTPUT
+          
+          if [ "$stale_count" -gt 0 ]; then
+            echo "⚠️ Found $stale_count stale agents"
+            echo "$response" | jq -r '.agents[] | "  - Agent #\(.id): \(.prompt | .[0:50])..."'
+          else
+            echo "✅ No stale agents found"
+          fi
+      
+      - name: Create Alert Issue
+        if: steps.stale-agents.outputs.stale_count > 0
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const staleCount = '${{ steps.stale-agents.outputs.stale_count }}';
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `⚠️ ${staleCount} Stale Codegen Agent(s) Detected`,
+              body: `## Stale Agent Alert\n\n` +
+                    `**Count:** ${staleCount} agent(s) running for >2 hours\n\n` +
+                    `**Action Required:**\n` +
+                    `1. Review agents at https://codegen.com/agents\n` +
+                    `2. Check if agents are stuck or making progress\n` +
+                    `3. Consider canceling hung agents\n` +
+                    `4. Investigate root cause\n\n` +
+                    `**Auto-generated by Codegen Sync workflow**`,
+              labels: ['codegen', 'alert', 'needs-attention']
+            });
+
+  summary:
+    name: Generate Summary
+    runs-on: ubuntu-latest
+    needs: [health-check, sync-rules, collect-analytics, check-stale-agents]
+    if: always()
+    
+    steps:
+      - name: Generate Final Summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const jobs = {
+              health_check: '${{ needs.health-check.result }}',
+              sync_rules: '${{ needs.sync-rules.result }}',
+              collect_analytics: '${{ needs.collect-analytics.result }}',
+              check_stale_agents: '${{ needs.check-stale-agents.result }}'
+            };
+            
+            const statusEmoji = (status) => {
+              switch(status) {
+                case 'success': return '✅';
+                case 'failure': return '❌';
+                case 'skipped': return '⏭️';
+                default: return '❓';
+              }
+            };
+            
+            core.summary
+              .addHeading('🔄 Codegen Sync Summary')
+              .addTable([
+                [{data: 'Job', header: true}, {data: 'Status', header: true}],
+                ['Health Check', `${statusEmoji(jobs.health_check)} ${jobs.health_check}`],
+                ['Sync Rules', `${statusEmoji(jobs.sync_rules)} ${jobs.sync_rules}`],
+                ['Collect Analytics', `${statusEmoji(jobs.collect_analytics)} ${jobs.collect_analytics}`],
+                ['Check Stale Agents', `${statusEmoji(jobs.check_stale_agents)} ${jobs.check_stale_agents}`]
+              ])
+              .addRaw(`\n**Run Time:** ${new Date().toISOString()}`)
+              .addRaw(`\n**Dashboard:** https://codegen.com/analytics`)
+              .write();

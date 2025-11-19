@@ -1,0 +1,109 @@
+name: 🐛 Codegen Bug Fix
+description: Report a bug to be fixed by Codegen agent
+title: "[Bug] "
+labels: ["codegen", "bug"]
+assignees:
+  - codegen-agent
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Codegen Bug Fix Request
+        
+        Describe the bug and Codegen will analyze it, identify the root cause, 
+        and push a fix automatically.
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Bug Description
+      description: What's the bug? What behavior did you observe?
+      placeholder: When I try to log in, I get a 500 error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What should happen instead?
+      placeholder: Users should be able to log in successfully
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Go to /login
+        2. Enter valid credentials
+        3. Click "Sign In"
+        4. See error message
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-logs
+    attributes:
+      label: Error Logs / Stack Trace
+      description: Paste relevant error messages or stack traces
+      render: shell
+      placeholder: |
+        Traceback (most recent call last):
+          File "auth.py", line 42, in login
+            ...
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Where does this bug occur?
+      value: |
+        - OS: 
+        - Browser: 
+        - Version: 
+        - Environment (dev/staging/prod):
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Low - Minor issue, workaround exists
+        - Medium - Affects functionality but not critical
+        - High - Major functionality broken
+        - Critical - Complete system failure
+      default: 1
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected-files
+    attributes:
+      label: Suspected Files
+      description: Files you think might be related to this bug
+      placeholder: |
+        - src/auth/login.py
+        - src/middleware/validation.py
+
+  - type: checkboxes
+    id: verification
+    attributes:
+      label: Verification Checklist
+      options:
+        - label: I have checked that this bug is not already reported
+        - label: I have included error logs or stack traces
+        - label: I can provide steps to reproduce
+        - label: I want Codegen to include tests in the fix
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        **@codegen** will analyze this bug and push a fix automatically.
+        
+        Track progress at: https://codegen.com/agents

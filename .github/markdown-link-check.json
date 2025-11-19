@@ -1,0 +1,30 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^http://localhost"
+    },
+    {
+      "pattern": "^http://127.0.0.1"
+    },
+    {
+      "pattern": "^http://136.119.36.216:7272"
+    },
+    {
+      "pattern": "^https://codegen.com/agents/"
+    }
+  ],
+  "replacementPatterns": [],
+  "httpHeaders": [
+    {
+      "urls": ["https://github.com"],
+      "headers": {
+        "Accept-Encoding": "zstd, br, gzip, deflate"
+      }
+    }
+  ],
+  "timeout": "20s",
+  "retryOn429": true,
+  "retryCount": 3,
+  "fallbackRetryDelay": "30s",
+  "aliveStatusCodes": [200, 206]
+}
