@@ -633,6 +633,19 @@ R2R_SERVICE_PASSWORD=<stored in vault>
 
 11. ⏭️ Final Review and Readiness Assessment
 
+### Deferred 🔒 (Infrastructure - Phase 5)
+
+**Monitoring & Caching Infrastructure (postponed):**
+- 🔒 Grafana dashboards - deferred to Phase 5
+- 🔒 Prometheus metrics collection - deferred to Phase 5  
+- 🔒 Redis cache setup - deferred to Phase 5 (will use in-memory cache for Phases 0-4)
+
+**Rationale:**
+- Focus on core functionality first (Phases 0-4)
+- Use simpler alternatives for early phases (in-memory cache vs Redis)
+- Add production-grade monitoring only in Phase 5 (Production Readiness)
+- Reduces complexity and setup time for prototyping and development
+
 ---
 
 ## Следующие шаги

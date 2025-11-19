@@ -980,7 +980,24 @@ class R2RAuthManager:
 
 ## Caching Layer
 
-### Redis-based Cache (Production)
+### 🔒 Infrastructure Decision: Redis Deferred to Phase 5
+
+**Status:** Redis setup POSTPONED to Phase 5 (Production Readiness)
+
+**Phases 0-4:** Use **In-Memory Cache** (see below)
+
+**Phase 5:** Migrate to **Redis Cache** for production
+
+**Rationale:**
+- ✅ Reduces infrastructure complexity during development
+- ✅ In-memory cache sufficient for prototyping and testing  
+- ✅ No external dependencies (Redis) during Phases 0-4
+- ✅ Faster iteration and simpler setup
+- ✅ Same interface, easy migration to Redis later
+
+---
+
+### Redis-based Cache (Production - Phase 5 Only)
 
 **Configuration:**
 
@@ -1435,7 +1452,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 CMD ["uvicorn", "mcp_server:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "4"]
 ```
 
-**docker-compose.yml:**
+**docker-compose.yml (Phase 5 with Redis):**
 
 ```yaml
 version: '3.8'
@@ -1445,20 +1462,41 @@ services:
     build: .
     ports:
       - "8080:8080"
-      - "9090:9090"  # Prometheus metrics
+      - "9090:9090"  # Prometheus metrics (Phase 5 only)
     environment:
       - R2R_API_URL=http://136.119.36.216:7272
       - R2R_SERVICE_EMAIL=claude-code-service@example.com
       - R2R_SERVICE_PASSWORD=${R2R_SERVICE_PASSWORD}
+      - CACHE_TYPE=redis  # Use 'memory' for Phases 0-4
       - REDIS_URL=redis://redis:6379
     depends_on:
-      - redis
+      - redis  # Remove this dependency for Phases 0-4
     restart: unless-stopped
 
+  # 🔒 Redis service - Phase 5 only
+  # For Phases 0-4: Remove this entire service
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    restart: unless-stopped
+```
+
+**docker-compose.yml (Phases 0-4, simplified):**
+
+```yaml
+version: '3.8'
+
+services:
+  r2r-mcp-server:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - R2R_API_URL=http://136.119.36.216:7272
+      - R2R_SERVICE_EMAIL=claude-code-service@example.com
+      - R2R_SERVICE_PASSWORD=${R2R_SERVICE_PASSWORD}
+      - CACHE_TYPE=memory  # In-memory cache for development
     restart: unless-stopped
 ```
 
