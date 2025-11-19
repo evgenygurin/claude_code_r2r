@@ -1,0 +1,95 @@
+name: 🤖 Codegen Feature Request
+description: Request a new feature to be implemented by Codegen agent
+title: "[Codegen] "
+labels: ["codegen", "enhancement"]
+assignees:
+  - codegen-agent
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Codegen Feature Request
+        
+        This issue will be automatically assigned to the Codegen agent for implementation.
+        The agent will analyze requirements, propose a plan, and create a PR.
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature Description
+      description: Describe the feature you'd like Codegen to implement
+      placeholder: |
+        I would like to add authentication middleware that...
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: What conditions must be met for this feature to be complete?
+      placeholder: |
+        - [ ] Users can log in with email/password
+        - [ ] JWT tokens are issued on successful login
+        - [ ] Protected routes require valid tokens
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgent is this feature?
+      options:
+        - Low
+        - Medium
+        - High
+        - Critical
+      default: 1
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical-notes
+    attributes:
+      label: Technical Notes
+      description: Any technical constraints or preferences for implementation
+      placeholder: |
+        - Use bcrypt for password hashing
+        - JWT should expire after 24 hours
+        - Store tokens in HTTP-only cookies
+
+  - type: textarea
+    id: files-to-modify
+    attributes:
+      label: Files to Modify (optional)
+      description: Specific files or modules that need changes
+      placeholder: |
+        - src/middleware/auth.py
+        - src/routes/users.py
+        - config/settings.py
+
+  - type: checkboxes
+    id: agent-behavior
+    attributes:
+      label: Agent Behavior
+      description: How should Codegen approach this task?
+      options:
+        - label: Propose a plan before implementation
+          required: false
+        - label: Include comprehensive tests
+          required: false
+        - label: Update documentation
+          required: false
+        - label: Run CI checks before creating PR
+          required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        **@codegen** will be automatically notified and will start working on this feature.
+        
+        Track progress at: https://codegen.com/agents

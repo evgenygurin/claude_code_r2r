@@ -1,0 +1,283 @@
+{
+  "$schema": "https://api.codegen.com/schemas/config.json",
+  "version": "1.0",
+  
+  "repository": {
+    "name": "claude_code_r2r",
+    "owner": "evgenygurin",
+    "description": "R2R + Claude Code Integration via MCP",
+    "primary_branch": "master"
+  },
+
+  "agent_behavior": {
+    "propose_plan": true,
+    "require_explicit_mentions": false,
+    "auto_assign_issues": true,
+    "auto_fix_checks": true,
+    "max_check_retries": 3
+  },
+
+  "rules": {
+    "auto_detect_patterns": [
+      "AGENTS.md",
+      "CLAUDE.md",
+      ".cursorrules",
+      ".clinerules",
+      "**/*.mdc"
+    ],
+    "max_rules_size": 25000,
+    "priority": "user > repository > organization"
+  },
+
+  "setup_commands": {
+    "enabled": true,
+    "commands": [
+      "# Switch to Python 3.10",
+      "pyenv install 3.10.0",
+      "pyenv local 3.10.0",
+      "",
+      "# Create virtual environment",
+      "python -m venv venv",
+      "source venv/bin/activate",
+      "",
+      "# Install dependencies",
+      "pip install --upgrade pip",
+      "pip install -r requirements.txt",
+      "",
+      "# Install development dependencies",
+      "pip install -r requirements-dev.txt",
+      "",
+      "# Install pre-commit hooks",
+      "pre-commit install",
+      "",
+      "# Run initial setup",
+      "python scripts/setup_project.py"
+    ],
+    "timeout": 600,
+    "retry_on_failure": true
+  },
+
+  "sandbox": {
+    "environment_variables": {
+      "R2R_API_URL": "http://136.119.36.216:7272",
+      "CACHE_TYPE": "memory",
+      "LOG_LEVEL": "INFO",
+      "PYTHONPATH": "/workspace"
+    },
+    "secrets": [
+      {
+        "name": "R2R_SERVICE_EMAIL",
+        "description": "R2R service account email",
+        "required": true
+      },
+      {
+        "name": "R2R_SERVICE_PASSWORD",
+        "description": "R2R service account password",
+        "required": true
+      },
+      {
+        "name": "CODEGEN_API_KEY",
+        "description": "Codegen API key for agent operations",
+        "required": false
+      }
+    ],
+    "web_preview": {
+      "enabled": false,
+      "port": 8080
+    }
+  },
+
+  "integrations": {
+    "github": {
+      "enabled": true,
+      "permissions": [
+        "contents:write",
+        "pull_requests:write",
+        "issues:write",
+        "checks:write"
+      ],
+      "auto_create_pr": true,
+      "pr_template": ".github/PULL_REQUEST_TEMPLATE.md",
+      "require_reviews": false
+    },
+    
+    "circleci": {
+      "enabled": true,
+      "monitor_checks": true,
+      "auto_fix_failures": true,
+      "retry_limit": 3,
+      "projects": []
+    },
+
+    "slack": {
+      "enabled": false,
+      "channels": [],
+      "notifications": {
+        "pr_created": false,
+        "pr_merged": false,
+        "checks_failed": false,
+        "agent_started": false,
+        "agent_completed": false
+      }
+    },
+
+    "linear": {
+      "enabled": false,
+      "auto_link_prs": false,
+      "update_status": false
+    },
+
+    "mcp_servers": {
+      "enabled": true,
+      "servers": [
+        {
+          "name": "r2r-mcp",
+          "type": "http",
+          "url": "http://localhost:8080/mcp",
+          "enabled": false,
+          "description": "R2R MCP Server (to be implemented)",
+          "tools": [
+            "r2r_search",
+            "r2r_rag_query",
+            "r2r_ingest_document",
+            "r2r_list_documents",
+            "r2r_monitor_task",
+            "r2r_list_collections"
+          ]
+        }
+      ]
+    }
+  },
+
+  "testing": {
+    "required_before_pr": true,
+    "coverage_threshold": 80,
+    "commands": [
+      "pytest tests/ -v",
+      "pytest --cov=mcp_server --cov=sync_system tests/",
+      "pytest --cov-report=html --cov-report=term"
+    ],
+    "frameworks": ["pytest", "pytest-asyncio", "coverage"]
+  },
+
+  "linting": {
+    "enabled": true,
+    "tools": [
+      {
+        "name": "ruff",
+        "command": "ruff check .",
+        "auto_fix": true
+      },
+      {
+        "name": "mypy",
+        "command": "mypy .",
+        "auto_fix": false
+      },
+      {
+        "name": "black",
+        "command": "black --check .",
+        "auto_fix": true
+      }
+    ]
+  },
+
+  "documentation": {
+    "auto_update": true,
+    "paths": [
+      "docs/@analysis/",
+      "docs/@critical/",
+      "README.md"
+    ],
+    "format": "markdown",
+    "require_docstrings": true
+  },
+
+  "workflows": {
+    "custom_triggers": [
+      {
+        "name": "Update R2R Documentation",
+        "command": "@codegen update R2R docs",
+        "description": "Sync project documentation to R2R",
+        "requires_approval": false
+      },
+      {
+        "name": "Fix Failing Tests",
+        "command": "@codegen fix tests",
+        "description": "Analyze and fix failing test cases",
+        "requires_approval": false
+      },
+      {
+        "name": "Implement MCP Tool",
+        "command": "@codegen implement tool <tool_name>",
+        "description": "Implement a new MCP tool",
+        "requires_approval": true
+      }
+    ]
+  },
+
+  "checks_autofixer": {
+    "enabled": true,
+    "retry_limit": 3,
+    "per_check_settings": {
+      "pytest": {
+        "enabled": true,
+        "retry_limit": 3,
+        "custom_instructions": "Analyze test failures, fix the root cause, and ensure all tests pass. Add new tests if necessary."
+      },
+      "ruff": {
+        "enabled": true,
+        "retry_limit": 1,
+        "custom_instructions": "Fix linting errors according to project style guide."
+      },
+      "mypy": {
+        "enabled": true,
+        "retry_limit": 2,
+        "custom_instructions": "Fix type errors. Add type hints where missing."
+      },
+      "coverage": {
+        "enabled": true,
+        "retry_limit": 2,
+        "custom_instructions": "Add tests to achieve 80% coverage threshold."
+      }
+    },
+    "failure_escalation": {
+      "notify_on_max_retries": true,
+      "create_issue": true,
+      "label": "needs-human-review"
+    }
+  },
+
+  "pr_review": {
+    "enabled": true,
+    "auto_review": true,
+    "focus_areas": [
+      "code_quality",
+      "security",
+      "performance",
+      "test_coverage",
+      "documentation"
+    ],
+    "comment_style": "inline",
+    "severity_levels": ["info", "warning", "error"]
+  },
+
+  "analytics": {
+    "track_token_usage": true,
+    "track_completion_rates": true,
+    "track_tool_usage": true,
+    "dashboard_url": "https://codegen.com/analytics"
+  },
+
+  "metadata": {
+    "project_phase": "Phase 0 - Research & Prototyping",
+    "completion_percentage": 85,
+    "last_updated": "2025-01-19",
+    "maintainer": "evgenygurin",
+    "documentation_urls": {
+      "primary": "CLAUDE.md",
+      "agents": "AGENTS.md",
+      "analysis": "docs/@analysis/README.md",
+      "critical": "docs/@critical/01_critical_issues.md"
+    }
+  }
+}

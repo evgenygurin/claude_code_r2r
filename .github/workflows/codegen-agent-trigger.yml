@@ -1,0 +1,92 @@
+name: Codegen Agent Trigger
+
+# Trigger Codegen agents via GitHub comments and labels
+on:
+  issue_comment:
+    types: [created]
+  issues:
+    types: [labeled, opened]
+  pull_request:
+    types: [labeled, opened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  trigger-agent:
+    name: Trigger Codegen Agent
+    runs-on: ubuntu-latest
+    
+    # Only run if comment mentions @codegen or has codegen label
+    if: |
+      (github.event_name == 'issue_comment' && 
+       contains(github.event.comment.body, '@codegen')) ||
+      (github.event_name == 'issues' && 
+       contains(github.event.issue.labels.*.name, 'codegen')) ||
+      (github.event_name == 'pull_request' && 
+       contains(github.event.pull_request.labels.*.name, 'codegen'))
+    
+    steps:
+      - name: Extract Context
+        id: context
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let prompt = '';
+            let contextType = '';
+            
+            if (context.eventName === 'issue_comment') {
+              prompt = context.payload.comment.body;
+              contextType = context.payload.issue.pull_request ? 'pr_comment' : 'issue_comment';
+            } else if (context.eventName === 'issues') {
+              prompt = context.payload.issue.body;
+              contextType = 'issue';
+            } else if (context.eventName === 'pull_request') {
+              prompt = context.payload.pull_request.body;
+              contextType = 'pull_request';
+            }
+            
+            core.setOutput('prompt', prompt);
+            core.setOutput('context_type', contextType);
+            
+            return { prompt, contextType };
+      
+      - name: Call Codegen API
+        env:
+          CODEGEN_API_KEY: ${{ secrets.CODEGEN_API_KEY }}
+          CODEGEN_ORG_ID: ${{ secrets.CODEGEN_ORG_ID }}
+        run: |
+          curl -X POST "https://api.codegen.com/v1/organizations/${CODEGEN_ORG_ID}/agent/run" \
+            -H "Authorization: Bearer ${CODEGEN_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"prompt\": \"${PROMPT}\",
+              \"repo_id\": ${REPO_ID},
+              \"metadata\": {
+                \"github_context\": \"${CONTEXT_TYPE}\",
+                \"issue_number\": ${ISSUE_NUMBER},
+                \"triggered_by\": \"${GITHUB_ACTOR}\"
+              }
+            }"
+        env:
+          PROMPT: ${{ steps.context.outputs.prompt }}
+          CONTEXT_TYPE: ${{ steps.context.outputs.context_type }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+          REPO_ID: ${{ github.repository_id }}
+      
+      - name: Acknowledge Trigger
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumber = context.payload.issue?.number || 
+                              context.payload.pull_request?.number;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: '🤖 Codegen agent triggered! I\'ll start working on this shortly.\n\nTrack progress at: https://codegen.com/agents'
+            });
