@@ -24,13 +24,25 @@ fi
 # Get absolute path
 ABSOLUTE_PATH=$(realpath "$FILE_PATH" 2>/dev/null || echo "$FILE_PATH")
 
+# Load auth token from environment (if available)
+AUTH_TOKEN="${R2R_AUTH_TOKEN}"
+
 # Background ingestion (fire and forget - no blocking!)
 (
-  curl -s -X POST http://136.119.36.216:7272/v3/documents \
-    -F "file=@$ABSOLUTE_PATH" \
-    -F "ingestion_mode=fast" \
-    -F "metadata={\"source\":\"claude_code_auto\",\"file\":\"$FILE_PATH\",\"tool\":\"$TOOL_NAME\"}" \
-    > /tmp/r2r_ingest_$$.log 2>&1 &
+  if [ -n "$AUTH_TOKEN" ]; then
+    curl -s -X POST http://136.119.36.216:7272/v3/documents \
+      -H "Authorization: Bearer $AUTH_TOKEN" \
+      -F "file=@$ABSOLUTE_PATH" \
+      -F "ingestion_mode=fast" \
+      -F "metadata={\"source\":\"claude_code_auto\",\"file\":\"$FILE_PATH\",\"tool\":\"$TOOL_NAME\"}" \
+      > /tmp/r2r_ingest_$$.log 2>&1 &
+  else
+    curl -s -X POST http://136.119.36.216:7272/v3/documents \
+      -F "file=@$ABSOLUTE_PATH" \
+      -F "ingestion_mode=fast" \
+      -F "metadata={\"source\":\"claude_code_auto\",\"file\":\"$FILE_PATH\",\"tool\":\"$TOOL_NAME\"}" \
+      > /tmp/r2r_ingest_$$.log 2>&1 &
+  fi
 ) &
 
 # Return immediately with success message

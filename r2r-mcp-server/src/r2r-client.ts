@@ -15,9 +15,79 @@ import type {
 
 export class R2RClient {
   private baseUrl: string;
+  private authToken: string | null;
 
-  constructor(baseUrl?: string) {
+  constructor(baseUrl?: string, authToken?: string) {
     this.baseUrl = baseUrl || process.env.R2R_BASE_URL || 'http://136.119.36.216:7272';
+    this.authToken = authToken || process.env.R2R_AUTH_TOKEN || null;
+  }
+
+  /**
+   * Get authorization headers
+   */
+  private getAuthHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (this.authToken) {
+      headers['Authorization'] = `Bearer ${this.authToken}`;
+    }
+
+    return headers;
+  }
+
+  /**
+   * Login to R2R and get access token
+   */
+  async login(email: string, password: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/v2/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Login failed: ${response.status} - ${error}`);
+      }
+
+      const data = await response.json() as any;
+
+      // Store the access token
+      if (data.results?.access_token?.token) {
+        this.authToken = data.results.access_token.token;
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              {
+                status: 'success',
+                message: 'Logged in successfully',
+                token: this.authToken,
+                expires_at: data.results?.access_token?.expires_at,
+              },
+              null,
+              2
+            ),
+          },
+        ],
+      };
+    } catch (error: any) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error logging in: ${error.message}`,
+          },
+        ],
+        isError: true,
+      };
+    }
   }
 
   /**
@@ -46,8 +116,14 @@ export class R2RClient {
         formData.append('metadata', JSON.stringify(args.metadata));
       }
 
+      const headers: Record<string, string> = {};
+      if (this.authToken) {
+        headers['Authorization'] = `Bearer ${this.authToken}`;
+      }
+
       const response = await fetch(`${this.baseUrl}/v3/documents`, {
         method: 'POST',
+        headers,
         body: formData as any,
       });
 
@@ -109,7 +185,7 @@ export class R2RClient {
 
       const response = await fetch(`${this.baseUrl}/v3/retrieval/search`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify({
           query: args.query,
           search_settings: searchSettings,
@@ -185,7 +261,7 @@ export class R2RClient {
 
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify(requestBody),
       });
 
@@ -256,7 +332,7 @@ export class R2RClient {
     try {
       const response = await fetch(`${this.baseUrl}/v3/retrieval/search`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify({
           query: args.query,
           graph_search_settings: {
@@ -302,7 +378,9 @@ export class R2RClient {
       const limit = args.limit || 100;
       const offset = args.offset || 0;
 
-      const response = await fetch(`${this.baseUrl}/v3/documents?limit=${limit}&offset=${offset}`);
+      const response = await fetch(`${this.baseUrl}/v3/documents?limit=${limit}&offset=${offset}`, {
+        headers: this.getAuthHeaders(),
+      });
 
       if (!response.ok) {
         const error = await response.text();
@@ -359,6 +437,7 @@ export class R2RClient {
     try {
       const response = await fetch(`${this.baseUrl}/v3/documents/${documentId}`, {
         method: 'DELETE',
+        headers: this.getAuthHeaders(),
       });
 
       if (!response.ok) {

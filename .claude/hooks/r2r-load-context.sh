@@ -7,16 +7,32 @@ SESSION_ID=$(echo "$INPUT" | jq -r '.session_id')
 PROJECT_DIR=$(echo "$INPUT" | jq -r '.cwd')
 PROJECT_NAME=$(basename "$PROJECT_DIR")
 
-# Quick search for project-related docs
-SEARCH_RESULTS=$(curl -s -X POST http://136.119.36.216:7272/v3/retrieval/search \
-  -H "Content-Type: application/json" \
-  -d "{
-    \"query\": \"project overview $PROJECT_NAME documentation\",
-    \"search_settings\": {
-      \"search_mode\": \"advanced\",
-      \"limit\": 5
-    }
-  }" 2>/dev/null)
+# Load auth token from environment (if available)
+AUTH_TOKEN="${R2R_AUTH_TOKEN}"
+
+# Build curl command with auth if available
+if [ -n "$AUTH_TOKEN" ]; then
+  SEARCH_RESULTS=$(curl -s -X POST http://136.119.36.216:7272/v3/retrieval/search \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $AUTH_TOKEN" \
+    -d "{
+      \"query\": \"project overview $PROJECT_NAME documentation\",
+      \"search_settings\": {
+        \"search_mode\": \"advanced\",
+        \"limit\": 5
+      }
+    }" 2>/dev/null)
+else
+  SEARCH_RESULTS=$(curl -s -X POST http://136.119.36.216:7272/v3/retrieval/search \
+    -H "Content-Type: application/json" \
+    -d "{
+      \"query\": \"project overview $PROJECT_NAME documentation\",
+      \"search_settings\": {
+        \"search_mode\": \"advanced\",
+        \"limit\": 5
+      }
+    }" 2>/dev/null)
+fi
 
 # Check if we got results
 if [ -n "$SEARCH_RESULTS" ] && [ "$SEARCH_RESULTS" != "null" ]; then

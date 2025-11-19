@@ -14,7 +14,8 @@ import {
 import { R2RClient } from './r2r-client.js';
 
 const R2R_BASE_URL = process.env.R2R_BASE_URL || 'http://136.119.36.216:7272';
-const r2rClient = new R2RClient(R2R_BASE_URL);
+const R2R_AUTH_TOKEN = process.env.R2R_AUTH_TOKEN;
+const r2rClient = new R2RClient(R2R_BASE_URL, R2R_AUTH_TOKEN);
 
 const server = new Server(
   {
@@ -32,6 +33,25 @@ const server = new Server(
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
+      {
+        name: 'r2r_login',
+        description:
+          'Login to R2R API and obtain access token. Required for authenticated operations. Returns access token that is automatically used for subsequent requests.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            email: {
+              type: 'string',
+              description: 'User email address',
+            },
+            password: {
+              type: 'string',
+              description: 'User password',
+            },
+          },
+          required: ['email', 'password'],
+        },
+      },
       {
         name: 'r2r_ingest',
         description:
@@ -201,6 +221,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   try {
     switch (name) {
+      case 'r2r_login':
+        return await r2rClient.login((args as any).email, (args as any).password);
+
       case 'r2r_ingest':
         return await r2rClient.ingestDocument(args as any);
 
