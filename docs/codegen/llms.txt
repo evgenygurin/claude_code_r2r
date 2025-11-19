@@ -1,0 +1,204 @@
+# Codegen
+
+## Docs
+
+- [Retrieving Traces](https://docs.codegen.com/api-reference/agent-run-logs.md)
+- [Get Agent Run Logs](https://docs.codegen.com/api-reference/agents-alpha/get-agent-run-logs.md): Retrieve an agent run with its logs using pagination. This endpoint is currently in ALPHA and IS subject to change.
+
+Returns the agent run details along with a paginated list of logs for the specified agent run.
+The agent run must belong to the specified organization. Logs are returned in chronological order.
+Uses standard pagination parameters (skip and limit) and includes pagination metadata in the response.
+
+Rate limit: 60 requests per 60 seconds.
+- [Ban All Checks For Agent Run](https://docs.codegen.com/api-reference/agents/ban-all-checks-for-agent-run.md): Ban all checks for a PR and stop all related agents.
+
+This endpoint:
+1. Flags the PR to prevent future CI/CD check suite events from being processed
+2. Stops all current agents for that PR
+- [Create Agent Run](https://docs.codegen.com/api-reference/agents/create-agent-run.md): Create a new agent run.
+
+Creates and initiates a long-running agent process based on the provided prompt.
+The process will complete asynchronously, and the response contains the agent run ID
+which can be used to check the status later. The requesting user must be a member
+of the specified organization.
+
+This endpoint accepts both a text prompt and an optional image file upload.
+
+Rate limit: 10 requests per minute.
+- [Get Agent Run](https://docs.codegen.com/api-reference/agents/get-agent-run.md): Retrieve the status and result of an agent run.
+
+Returns the current status, progress, and any available results for the specified agent run.
+The agent run must belong to the specified organization. If the agent run is still in progress,
+this endpoint can be polled to check for completion.
+
+Rate limit: 60 requests per 30 seconds.
+- [List Agent Runs](https://docs.codegen.com/api-reference/agents/list-agent-runs.md): List agent runs for an organization with optional user filtering.
+
+Returns a paginated list of agent runs for the specified organization.
+Optionally filter by user_id to get only agent runs initiated by a specific user.
+Results are ordered by creation date (newest first).
+
+Rate limit: 60 requests per 30 seconds.
+- [Remove Codegen From Pr](https://docs.codegen.com/api-reference/agents/remove-codegen-from-pr.md): Remove Codegen from a PR.
+
+This endpoint performs the same action as banning all checks but with more user-friendly naming.
+It:
+1. Flags the PR to prevent future CI/CD check suite events from being processed
+2. Stops all current agents for that PR
+- [Resume Agent Run](https://docs.codegen.com/api-reference/agents/resume-agent-run.md): Resume a paused agent run.
+
+Resumes a paused agent run, allowing it to continue processing.
+
+Note: Setup commands agents are automatically routed to their dedicated resume function.
+- [Unban All Checks For Agent Run](https://docs.codegen.com/api-reference/agents/unban-all-checks-for-agent-run.md): Unban all checks for a PR.
+
+This endpoint:
+1. Removes the ban flag from the PR to allow future CI/CD check suite events to be processed
+2. Handles both URL-based bans and parent-agent-run-based bans
+- [Authentication](https://docs.codegen.com/api-reference/authentication.md)
+- [Get Cli Rules](https://docs.codegen.com/api-reference/cli-rules/get-cli-rules.md): Get organization and user rules for CLI applications.
+
+This endpoint is designed for CLI applications that need to fetch both organization-specific
+rules and user-specific custom prompts that are used in prompts. This includes:
+
+- Organization rules: Same as MCP organization_rules prompt and agent prompt builders
+- User custom prompt: Same as MCP user_custom_prompt and agent prompt builders
+
+Returns the rules and prompts that should be followed by AI agents.
+
+Rate limit: 30 requests per minute.
+- [Get Organization Integrations Endpoint](https://docs.codegen.com/api-reference/integrations/get-organization-integrations-endpoint.md): Get all integration statuses for the given organization.
+
+Returns a comprehensive overview of all integrations configured for the organization,
+including:
+- OAuth-based integrations (Slack, Linear, Notion, Figma, ClickUp, Jira, Sentry, Monday.com)
+- GitHub app installations
+- API key-based integrations (CircleCI)
+- Database connections (PostgreSQL)
+
+Each integration includes its current status (active/inactive), associated token/installation IDs,
+and relevant metadata such as app names, organization names, etc.
+
+Rate limit: 60 requests per 30 seconds.
+- [Get Mcp Providers](https://docs.codegen.com/api-reference/organizations/get-mcp-providers.md): Get all MCP providers from oauth_providers table.
+
+Returns only providers with is_mcp=True.
+- [Get Oauth Token Status](https://docs.codegen.com/api-reference/organizations/get-oauth-token-status.md): Get list of providers that have active OAuth tokens for the current user and organization.
+
+Returns a list of provider names that are connected.
+- [Get Organizations](https://docs.codegen.com/api-reference/organizations/get-organizations.md): Get organizations for the authenticated user.
+
+Returns a paginated list of all organizations that the authenticated user is a member of.
+Results include basic organization details such as name, ID, and membership information.
+Use pagination parameters to control the number of results returned.
+
+Rate limit: 60 requests per 30 seconds.
+- [Revoke Oauth Token](https://docs.codegen.com/api-reference/organizations/revoke-oauth-token.md): Revoke/disconnect an OAuth token for a specific provider.
+
+Marks ALL tokens as inactive (is_active=False) for the current user and organization.
+- [Codegen API](https://docs.codegen.com/api-reference/overview.md)
+- [Edit Pull Request](https://docs.codegen.com/api-reference/pull-requests/edit-pull-request.md): Edit pull request properties (RESTful endpoint).
+
+Update the state of a pull request (open, closed, draft, ready_for_review).
+This endpoint requires both repo_id and pr_id for RESTful compliance.
+The requesting user must have write permissions to the repository.
+
+Rate limit: 30 requests per minute.
+- [Edit Pull Request Simple](https://docs.codegen.com/api-reference/pull-requests/edit-pull-request-simple.md): Edit pull request properties (simple endpoint).
+
+Update the state of a pull request (open, closed, draft, ready_for_review).
+This endpoint only requires the PR ID, not the repo ID.
+The requesting user must have write permissions to the repository.
+
+Rate limit: 30 requests per minute.
+- [Get Check Suite Settings](https://docs.codegen.com/api-reference/repositories/get-check-suite-settings.md): Get check suite settings for a repository.
+- [Get Repositories](https://docs.codegen.com/api-reference/repositories/get-repositories.md): Get repositories for the specified organization.
+
+Returns a paginated list of all repositories that belong to the specified organization.
+Results include repository details such as name, ID, description, visibility, and setup status.
+Use pagination parameters to control the number of results returned.
+
+Rate limit: 60 requests per 30 seconds.
+- [Update Check Suite Settings](https://docs.codegen.com/api-reference/repositories/update-check-suite-settings.md): Update check suite settings for a repository.
+- [Analyze Sandbox Logs](https://docs.codegen.com/api-reference/sandbox/analyze-sandbox-logs.md): Analyze sandbox setup logs using an AI agent.
+
+This endpoint creates an AI agent that will analyze the setup logs from a sandbox,
+identify any errors, provide insights about what went wrong, and suggest potential
+solutions. The analysis runs asynchronously and results can be retrieved using the
+returned agent run ID.
+
+Rate limit: 5 requests per minute.
+- [Generate Setup Commands](https://docs.codegen.com/api-reference/setup-commands/generate-setup-commands.md): Generate setup commands for a repository.
+
+Creates and initiates a setup command generation agent for the specified repository.
+The agent will analyze the repository structure and generate appropriate setup commands.
+
+Rate limit: 5 requests per minute.
+- [Generate Slack Connect Token Endpoint](https://docs.codegen.com/api-reference/slack-connect/generate-slack-connect-token-endpoint.md): Generate a temporary token for Slack account connection.
+
+This token:
+- Expires in 10 minutes
+- Can only be used once
+- Must be sent to the Codegen bot in a DM with format: "Connect my account: {token}"
+- [Get Current User Info](https://docs.codegen.com/api-reference/users/get-current-user-info.md): Get current user information from API token.
+
+Returns detailed information about the user associated with the provided API token.
+This is useful for applications that need to identify the current user from their API token.
+
+Rate limit: 60 requests per 30 seconds.
+- [Get User](https://docs.codegen.com/api-reference/users/get-user.md): Get details for a specific user in an organization.
+
+Returns detailed information about a user within the specified organization.
+The requesting user must be a member of the organization to access this endpoint.
+
+Rate limit: 60 requests per 30 seconds.
+- [Get Users](https://docs.codegen.com/api-reference/users/get-users.md): Get users for the specified organization.
+
+Returns a paginated list of all users that belong to the specified organization.
+Results include user details such as name, email, GitHub username, and avatar.
+Use pagination parameters to control the number of results returned.
+
+Rate limit: 60 requests per 30 seconds.
+- [Analytics](https://docs.codegen.com/capabilities/analytics.md)
+- [How Codegen Agents Work](https://docs.codegen.com/capabilities/capabilities.md)
+- [Check Suite Auto-fixer](https://docs.codegen.com/capabilities/checks-autofixer.md)
+- [Claude Code Integration](https://docs.codegen.com/capabilities/claude-code.md)
+- [PR Review Agent](https://docs.codegen.com/capabilities/pr-review.md)
+- [Triggering Codegen](https://docs.codegen.com/capabilities/triggering-codegen.md)
+- [CircleCI Integration](https://docs.codegen.com/integrations/circleci.md)
+- [ClickUp Integration](https://docs.codegen.com/integrations/clickup.md)
+- [Figma Integration](https://docs.codegen.com/integrations/figma.md)
+- [GitHub Integration](https://docs.codegen.com/integrations/github.md)
+- [Integrations](https://docs.codegen.com/integrations/integrations.md)
+- [Jira Integration](https://docs.codegen.com/integrations/jira.md)
+- [Linear Integration](https://docs.codegen.com/integrations/linear.md)
+- [MCP Servers](https://docs.codegen.com/integrations/mcp-servers.md)
+- [Monday.com Integration](https://docs.codegen.com/integrations/monday.md)
+- [Notion Integration](https://docs.codegen.com/integrations/notion.md)
+- [Postgres Integration](https://docs.codegen.com/integrations/postgres.md)
+- [Sentry Integration](https://docs.codegen.com/integrations/sentry.md)
+- [Integration for Slack](https://docs.codegen.com/integrations/slack.md)
+- [Web Search Integration](https://docs.codegen.com/integrations/web-search.md)
+- [Codegen, Inc.](https://docs.codegen.com/introduction/about.md)
+- [Codegen CLI](https://docs.codegen.com/introduction/cli.md)
+- [Community & Contributing](https://docs.codegen.com/introduction/community.md)
+- [Frequently Asked Questions](https://docs.codegen.com/introduction/faq.md)
+- [Codegen](https://docs.codegen.com/introduction/overview.md)
+- [Effective Prompting](https://docs.codegen.com/introduction/prompting.md)
+- [Python SDK](https://docs.codegen.com/introduction/sdk.md)
+- [Support](https://docs.codegen.com/introduction/support.md)
+- [Use Cases](https://docs.codegen.com/introduction/use-cases.md)
+- [Remote Editor (VSCode)](https://docs.codegen.com/sandboxes/editor.md)
+- [Environment Variables](https://docs.codegen.com/sandboxes/environment-variables.md)
+- [Code Execution Sandboxes](https://docs.codegen.com/sandboxes/overview.md)
+- [Repository Secrets](https://docs.codegen.com/sandboxes/secrets.md)
+- [Setup Commands](https://docs.codegen.com/sandboxes/setup-commands.md)
+- [Web Preview](https://docs.codegen.com/sandboxes/web-preview.md)
+- [Agent Behavior](https://docs.codegen.com/settings/agent-behavior.md)
+- [Agent Permissions](https://docs.codegen.com/settings/agent-permissions.md)
+- [LLM Configuration](https://docs.codegen.com/settings/model-configuration.md)
+- [On-Premises Deployments](https://docs.codegen.com/settings/on-prem-deployment.md)
+- [Agent Rules](https://docs.codegen.com/settings/repo-rules.md)
+- [Settings](https://docs.codegen.com/settings/settings.md)
+- [Team & User Roles](https://docs.codegen.com/settings/team-roles.md)
+- [Trufflehog Secret Scanning](https://docs.codegen.com/settings/trufflehog-integration.md)
