@@ -14,6 +14,7 @@ import time
 
 # Configuration
 API_BASE_URL = "http://localhost:7272"
+API_REMOTE_URL = "http://136.119.36.216:7272"  # Direct access via GCP IP
 DEFAULT_USERNAME = "admin@example.com"
 DEFAULT_PASSWORD = "change_me_immediately"
 REQUEST_TIMEOUT = 10
@@ -31,10 +32,30 @@ class TestResult:
 class R2RAPITester:
     """R2R API Testing Client"""
 
-    def __init__(self, base_url: str = API_BASE_URL, timeout: int = REQUEST_TIMEOUT):
-        self.base_url = base_url.rstrip('/')
+    def __init__(self, base_url: Optional[str] = None, timeout: int = REQUEST_TIMEOUT,
+                 use_remote: bool = False):
+        # Auto-detect best available URL
+        if base_url is None:
+            if use_remote:
+                self.base_url = API_REMOTE_URL
+            else:
+                # Try localhost first, fall back to remote
+                try:
+                    response = requests.head(API_BASE_URL, timeout=2)
+                    self.base_url = API_BASE_URL
+                except:
+                    self.base_url = API_REMOTE_URL
+        else:
+            self.base_url = base_url
+
+        self.base_url = self.base_url.rstrip('/')
         self.timeout = timeout
         self.session = requests.Session()
+        # Disable proxy for remote URL to bypass environment proxy settings
+        if self.base_url == API_REMOTE_URL:
+            self.session.trust_env = False
+            # Explicitly set no proxies
+            self.session.proxies = {}
         self.access_token: Optional[str] = None
         self.refresh_token: Optional[str] = None
         self.results = []
@@ -361,7 +382,18 @@ def main():
     print("R2R API Testing Tool")
     print("=" * 60)
 
-    tester = R2RAPITester()
+    # Check for --use-remote flag
+    use_remote = "--use-remote" in sys.argv or "--remote" in sys.argv
+
+    # Get custom URL if provided
+    custom_url = None
+    for i, arg in enumerate(sys.argv[1:], 1):
+        if arg.startswith("--url="):
+            custom_url = arg.split("=", 1)[1]
+
+    tester = R2RAPITester(base_url=custom_url, use_remote=use_remote)
+    print(f"Testing against: {tester.base_url}\n")
+
     success = tester.run_all_tests()
 
     sys.exit(0 if success else 1)

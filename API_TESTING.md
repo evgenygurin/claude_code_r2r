@@ -181,7 +181,26 @@ fi
 
 ## Testing with Python
 
-See the accompanying Python test client for more advanced testing scenarios.
+### Quick Test
+
+```bash
+# Install dependencies
+pip install -r requirements-test.txt
+
+# Run tests (auto-detects localhost tunnel, falls back to remote)
+python3 tests/test_api_login.py
+
+# Or explicitly use remote access (requires direct IP access)
+python3 tests/test_api_login.py --use-remote
+
+# Or use custom URL
+python3 tests/test_api_login.py --url=http://custom-host:7272
+```
+
+The test client will:
+1. Automatically detect tunnel availability
+2. Run a series of tests (health check, login, user info, collections, search)
+3. Report results with timing information
 
 ## CI/CD Integration
 
