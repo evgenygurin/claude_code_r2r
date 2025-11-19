@@ -138,6 +138,35 @@ All workflows are already in `.github/workflows/`. They will activate automatica
 
 ---
 
+### Error: "Failed to trigger code review: Not Found" (404)
+
+**Cause:** Missing or empty `CODEGEN_API_KEY` or `CODEGEN_ORG_ID` secrets
+
+**How to identify:** Check workflow logs - environment variables show as empty:
+```
+CODEGEN_API_KEY: 
+CODEGEN_ORG_ID:
+```
+
+**Solution:**
+1. Go to your repository: `Settings → Secrets and variables → Actions`
+2. Click "New repository secret"
+3. Add `CODEGEN_API_KEY` with your Codegen API key (starts with `sk_live_`)
+   - Get from: [codegen.com/settings/api-keys](https://codegen.com/settings/api-keys)
+4. Add `CODEGEN_ORG_ID` with your organization ID (numeric)
+   - Get from: [codegen.com/settings/organization](https://codegen.com/settings/organization)
+5. Rerun the failed workflow
+
+**Verification:**
+```bash
+# After adding secrets, trigger a test workflow
+gh workflow run codegen-pr-review.yml
+# Check logs to verify secrets are present
+gh run list --workflow=codegen-pr-review.yml --limit 1
+```
+
+---
+
 ### Error: "Rate limit exceeded"
 
 **Cause:** Too many API calls (limit: 10 requests/minute)
